@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 
+$crate = new \Crate\PDO\PDO("crate:localhost:4200", null, null, null);
 
 $app = new \Slim\Slim();
 
