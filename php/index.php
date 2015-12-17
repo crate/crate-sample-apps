@@ -1,8 +1,6 @@
 <?php
 require 'vendor/autoload.php';
 
-$crate = new \Crate\PDO\PDO("crate:localhost:4200", null, null, null);
-
 $app = new \Slim\Slim();
 
 $app->get('/', function() {
@@ -11,12 +9,23 @@ $app->get('/', function() {
 
 
 // posts
+$app->get('/posts', function() {
+	$crate = new Crate\PDO\PDO("crate:127.0.0.1:4200", null, null, null);
+	$qry = $crate->prepare("SELECT * FROM guestbook.posts");
+	$qry->execute();
+	$result = $qry->fetchAll(PDO::FETCH_ASSOC);
 
-$app->post('/posts', function() {
-	echo json_encode(array());
+	header("Content-type: application/json");
+	echo json_encode($result);
 });
 
-$app->get('/posts', function() {
+
+$app->post('/posts', function() {
+	$crate = new Crate\PDO\PDO("crate:127.0.0.1:4200", null, null, null);
+	$qry = $crate->prepare("SELECT * FROM guestbook.posts");
+	$qry->execute();
+
+	header("Content-type: application/json");
 	echo json_encode(array());
 });
 
@@ -25,11 +34,31 @@ $app->put('/posts/:id', function($id) {
 });
 
 $app->delete('/posts/:id', function($id) {
+	$crate = new Crate\PDO\PDO("crate:127.0.0.1:4200", null, null, null);
+	$qry = $crate->prepare("DELETE FROM guestbook.posts WHERE id=?");
+	$qry->bindParam(1, $id);
+	$state = $qry->execute();
 
+	header("Content-type: application/json");
+	echo json_encode(array('success' => $state));
 });
 
 $app->put('/posts/:id/likes', function($id) {
-	echo json_encode(1);
+	$crate = new Crate\PDO\PDO("crate:127.0.0.1:4200", null, null, null);
+	$qry = $crate->prepare("SELECT * FROM guestbook.posts WHERE id=?");
+	$qry->bindParam(1, $id);
+	$qry->execute();
+	$row = $qry->fetch(PDO::FETCH_ASSOC);
+
+	$qryU = $crate->prepare("UPDATE guestbook.posts SET like_count=? WHERE id=?");
+	$likeCount = $row['like_count'];
+	$likeCount++;
+	$qryU->bindParam(1, $likeCount);
+	$qryU->bindParam(2, $id);
+	$state = $qryU->execute();
+
+	header("Content-type: application/json");
+	echo json_encode(array('success' => $state));
 });
 
 
