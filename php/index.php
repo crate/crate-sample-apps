@@ -83,8 +83,17 @@ $app->post('/posts', function() use ($app) {
 });
 
 $app->put('/posts/:id', function($id) use ($app) {
-	header(CONTENT_TYPE_JSON);
-	echo json_encode(array());
+
+	$qry = $app->conn->prepare("UPDATE guestbook.posts SET text=? WHERE id=?");
+	$qry->bindParam(1, $app->request->post('text'));
+	$qry->bindParam(2, $id);
+	$state = $qry->execute();
+
+  if ($state) {
+    $app->success(201, array('success' => $state));
+  } else {
+    $app->error(500, $app->conn->errorInfo());
+  }
 });
 
 $app->delete('/posts/:id', function($id) use ($app) {
