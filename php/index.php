@@ -1,5 +1,9 @@
 <?php
 require 'vendor/autoload.php';
+$config = parse_ini_file('app.ini');
+
+// META CONTENT TYPES
+define('CONTENT_TYPE_JSON', 'Content-type: application/json');
 
 $app = new \Slim\Slim();
 
@@ -7,7 +11,7 @@ $app->get('/', function() {
 	echo json_encode(array());
 });
 
-$crate = new Crate\PDO\PDO("crate:127.0.0.1:4200", null, null, null);
+$crate = new Crate\PDO\PDO("{$config['db_dsn']}:{$config['db_port']}" , null, null, null);
 
 // posts
 $app->get('/posts', function() use ($app, $crate) {
@@ -15,7 +19,7 @@ $app->get('/posts', function() use ($app, $crate) {
 	$qry->execute();
 	$result = $qry->fetchAll(PDO::FETCH_ASSOC);
 
-	header("Content-type: application/json");
+	header(CONTENT_TYPE_JSON);
 	echo json_encode($result);
 });
 
@@ -38,7 +42,7 @@ $app->post('/posts', function() use ($app, $crate) {
 		$qry->bindParam(1, $id);
 		$state = $qry->execute();
 
-		header("Content-type: application/json");
+		header(CONTENT_TYPE_JSON);
 		echo json_encode(array('success' => $state));
 	} else {
 		// header("Content-type: application/json");
@@ -47,7 +51,7 @@ $app->post('/posts', function() use ($app, $crate) {
 });
 
 $app->put('/posts/:id', function($id) use ($app, $crate) {
-	header("Content-type: application/json");
+	header(CONTENT_TYPE_JSON);
 	echo json_encode(array());
 });
 
@@ -56,7 +60,7 @@ $app->delete('/posts/:id', function($id) use ($app, $crate) {
 	$qry->bindParam(1, $id);
 	$state = $qry->execute();
 
-	header("Content-type: application/json");
+	header(CONTENT_TYPE_JSON);
 	echo json_encode(array('success' => $state));
 });
 
@@ -73,7 +77,7 @@ $app->put('/posts/:id/likes', function($id) use ($app, $crate) {
 	$qryU->bindParam(2, $id);
 	$state = $qryU->execute();
 
-	header("Content-type: application/json");
+	header(CONTENT_TYPE_JSON);
 	echo json_encode(array('success' => $state));
 });
 
