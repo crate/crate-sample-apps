@@ -51,8 +51,13 @@ $app->post('/posts', function() use ($app, $crate) {
 });
 
 $app->put('/posts/:id', function($id) use ($app, $crate) {
+	$qry = $crate->prepare("UPDATE guestbook.posts SET text=? WHERE id=?");
+	$qry->bindParam(1, $app->request->post('text'));
+	$qry->bindParam(2, $id);
+	$state = $qry->execute();
+
 	header(CONTENT_TYPE_JSON);
-	echo json_encode(array());
+	echo json_encode(array('success' => $state));
 });
 
 $app->delete('/posts/:id', function($id) use ($app, $crate) {
