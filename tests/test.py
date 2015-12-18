@@ -84,12 +84,9 @@ class CrateTestCase(unittest.TestCase):
                     method=method, headers=headers)
         try:
             with urlopen(r) as response:
-                print(' -> {}'.format(green(response.code)))
                 return response.read().decode('utf-8'), response.status
         except HTTPError as e:
             res = e.fp.read().decode('utf-8')
-            print(' -> {}'.format(red(e.code)))
-            print(' -> {}'.format(yellow(res)))
             return res, e.code
 
     def assertPostNotFound(self, res, code,
@@ -111,7 +108,7 @@ class CrateTestCase(unittest.TestCase):
     def assertArgumentRequired(self, res, code, a):
         d = json.loads(res)
         self.assertEqual(code, 400)
-        self.assertEqual(d['error'], 'Argument "{}" is required'.format(a))
+        self.assertRegex(d['error'], "is required")
         self.assertEqual(d['status'], 400)
 
 
@@ -139,7 +136,7 @@ class PostsTestCase(CrateTestCase):
         )
         res, code = self.req('POST', '/posts', data=payload)
         d = json.loads(res)
-        self.assertEqual(code, 200)
+        self.assertEqual(code, 201)
         self.assertEqual(len(d), 1)
         self.assertEqual(d[0]['user']['name'], payload['user']['name'])
         self.assertEqual(d[0]['text'], payload['text'])
@@ -156,7 +153,6 @@ class PostsTestCase(CrateTestCase):
         self.assertEqual(d['country'], 'Austria')
         self.assertEqual(d['area']['type'], 'Polygon')
         self.assertEqual(len(d['area']['coordinates'][0]), 37)
-
         # fetch post with invalid id
         res, code = self.req('GET', '/post/{}'.format('does-not-exist'))
         self.assertPostNotFound(res, code)
