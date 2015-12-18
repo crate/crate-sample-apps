@@ -187,11 +187,11 @@ class PostList(PostResource):
         k = list(values.keys())
         v = list(values.values())
         # compile and execute INSERT statement
-        self.cursor.execute("""
-            INSERT INTO {} ({}) VALUES ({})
-        """.format(self.__table__,
-                   ', '.join(k),
-                   ', '.join('?' * len(v))), v)
+        self.cursor.execute("""INSERT INTO {} ({}) VALUES ({})""".format(
+            self.__table__,
+            ', '.join(k),
+            ', '.join('?' * len(v))
+        ), v)
         # refresh table to make sure new record is immediately available
         self.refresh_table()
         # fetch new record
