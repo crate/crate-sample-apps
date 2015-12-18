@@ -5,96 +5,141 @@ $config = parse_ini_file('app.ini');
 // META CONTENT TYPES
 define('CONTENT_TYPE_JSON', 'Content-type: application/json');
 
-$app = new \Slim\Slim();
+class CrateResource extends \Slim\Slim
+{
+  private $conn;
 
-$app->get('/', function() {
-	echo json_encode(array());
+  function __construct($config)
+  {
+    parent::__construct();
+    $this->$conn = new Crate\PDO\PDO("{$config['db_dsn']}:{$config['db_port']}" , null, null, null);
+  }
+
+  function argument_required($message) {
+    $this->error(400, $message);
+  }
+
+  function not_found($message) {
+    $this->error(404, $message);
+  }
+
+  function error($status, $message, $contenttype='application/json') {
+    $this->response->headers->set('Content-Type', $contenttype);
+    $this->response->setStatus($status);
+    $this->response->write(json_encode(array("error" => $message, "status" => $status)));
+  }
+
+  function success($status, $result, $contenttype='application/json') {
+    $this->response->headers->set('Content-Type', $contenttype);
+    $this->response->setStatus($status);
+    $this->response->write(json_encode($result));
+  }
+}
+
+$app = new CrateResource($config);
+
+$app->get('/', function() use ($app) {
+  $app->success(200, 'Server up and running');
 });
-
-$crate = new Crate\PDO\PDO("{$config['db_dsn']}:{$config['db_port']}" , null, null, null);
 
 // posts
-$app->get('/posts', function() use ($app, $crate) {
-	$qry = $crate->prepare("SELECT * FROM guestbook.posts");
+$app->get('/posts', function() use ($app) {
+	$qry = $app->$conn->prepare("SELECT * FROM guestbook.posts");
 	$qry->execute();
 	$result = $qry->fetchAll(PDO::FETCH_ASSOC);
-
-	header(CONTENT_TYPE_JSON);
-	echo json_encode($result);
+  $app->success(200, $result);
 });
 
+$app->post('/posts', function() use ($app) {
+  $user = json_decode($app->request->post('user'));
+  $text = $app->request->post('text');
+  $image_ref = $app->request->post('image_ref');
 
-$app->post('/posts', function() use ($app, $crate) {
+  if ( empty($user) ) {
+    $app->argument_required('user parameter is empty');
+    return;
+  } else if ( empty($user->{'name'}) ) {
+    $app->argument_required('user name parameter is empty');
+    return;
+  }
+
 	$id = uniqid();
 	$likeCount = 0;
-	$qry = $crate->prepare("INSERT INTO guestbook.posts (id, user, text, created, image_ref, like_count) 
+	$qry = $app->conn->prepare("INSERT INTO guestbook.posts (id, user, text, created, image_ref, like_count)
 			VALUES(?, ?, ?, ?, ?, ?)");
 	$qry->bindParam(1, $id);
-	$qry->bindParam(2, json_decode($app->request->post('user')));
-	$qry->bindParam(3, $app->request->post('text'));
+	$qry->bindParam(2, $user);
+	$qry->bindParam(3, $text);
 	$qry->bindParam(4, time());
-	$qry->bindParam(5, $app->request->post('image_ref'));
+	$qry->bindParam(5, $image_ref);
 	$qry->bindParam(6, $likeCount);
-	$success = $qry->execute();
+	$state = $qry->execute();
 
-	if($success) {
-		$qry = $crate->prepare("DELETE FROM guestbook.posts WHERE id=?");
-		$qry->bindParam(1, $id);
-		$state = $qry->execute();
-
-		header(CONTENT_TYPE_JSON);
-		echo json_encode(array('success' => $state));
-	} else {
-		// header("Content-type: application/json");
-		echo json_encode(array('error' => $qry->errorCode(), 'errorInfo' => $qry->errorInfo()));		
-	}
+  if ($state) {
+    $app->success(201, array('success' => $state));
+  } else {
+    $app->error(500, 'insert not successful');
+  }
 });
 
-$app->put('/posts/:id', function($id) use ($app, $crate) {
+$app->put('/posts/:id', function($id) use ($app) {
 	header(CONTENT_TYPE_JSON);
 	echo json_encode(array());
 });
 
-$app->delete('/posts/:id', function($id) use ($app, $crate) {
-	$qry = $crate->prepare("DELETE FROM guestbook.posts WHERE id=?");
+$app->delete('/posts/:id', function($id) use ($app) {
+  if ( empty($id) ) {
+    $app->argument_required('post-id argument is empty');
+    return;
+  }
+	$qry = $app->conn->prepare("DELETE FROM guestbook.posts WHERE id=?");
 	$qry->bindParam(1, $id);
 	$state = $qry->execute();
 
-	header(CONTENT_TYPE_JSON);
-	echo json_encode(array('success' => $state));
+  if ($state) {
+    $app->success(204, array('success' => $state));
+  } else {
+    $app->not_found('post-id with {$id} not found');
+  }
 });
 
-$app->put('/posts/:id/likes', function($id) use ($app, $crate) {
-	$qry = $crate->prepare("SELECT * FROM guestbook.posts WHERE id=?");
+$app->put('/posts/:id/likes', function($id) use ($app) {
+  if ( empty($id) ) {
+    $app->argument_required('post-id parameter is empty');
+    return;
+  }
+	$qry = $app->conn->prepare("SELECT * FROM guestbook.posts WHERE id=?");
 	$qry->bindParam(1, $id);
-	$qry->execute();
+	$result = $qry->execute();
 	$row = $qry->fetch(PDO::FETCH_ASSOC);
 
-	$qryU = $crate->prepare("UPDATE guestbook.posts SET like_count=? WHERE id=?");
-	$likeCount = $row['like_count'];
-	$likeCount++;
-	$qryU->bindParam(1, $likeCount);
-	$qryU->bindParam(2, $id);
-	$state = $qryU->execute();
+  if ($result) {
+    $qryU = $app->conn->prepare("UPDATE guestbook.posts SET like_count = like_count + 1 WHERE id=?");
+  	$qryU->bindParam(1, $id);
+  	$state = $qryU->execute();
 
-	header(CONTENT_TYPE_JSON);
-	echo json_encode(array('success' => $state));
+    if ($state) {
+      $app->success(204, array('success' => $state));
+    } else {
+      $app->error(500, 'update statement went wrong');
+    }
+  } else {
+    $app->not_found('post-id with {$id} not found');
+  }
 });
 
 
 // images
-
-$app->get('/images', function() use ($app, $crate) {
+$app->get('/images', function() use ($app) {
 	echo json_encode(array());
 });
 
-$app->post('/images', function() use ($app, $crate) {
+$app->post('/images', function() use ($app) {
 	echo json_encode(array());
 });
 
-$app->get('/image/:digest', function($digest) use ($app, $crate) {
+$app->get('/image/:digest', function($digest) use ($app) {
 
 });
-
 
 $app->run();
