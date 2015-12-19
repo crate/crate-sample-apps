@@ -110,7 +110,7 @@ class PostList(PostResource):
 The same way as it is possible to use parameter substitution in a single execute statement it is also possible to execute multiple statements at once. This can be done using the `executemany()` method. The second argument requires a list of tuples where each tuple represents the parameter of a single statement.
 
 ```python
-cursor.execute("""
+cursor.executemany("""
 	INSERT INTO guestbook.posts (
 		id, text, user, image_ref
 	) VALUES (
@@ -154,6 +154,55 @@ class PostList(PostResource):
                                 self.cursor.fetchall())
         ...
 ```
+
+### Handling BLOBs
+
+Additional to the implementation of the DB API the Crate Python client library also contains an API for handling BLOBs.
+
+A blob container is an easy to use wrapper around the BLOB API of the Crate server. It can be obtained from the `CrateConnection` object via the `get_blob_container()` method.
+
+```python
+container = connection.get_blob_container('my_blobs')
+```
+
+In our sample app the blob container is a property in the `ImageResource` class.
+
+```python
+class ImageResource(CrateResource):
+
+    __table__ = 'guestbook_images'
+    _blob_container = None
+
+    @property
+    def blob_container(self):
+        if not self._blob_container:
+            self._blob_container = self.connection.get_blob_container(
+                self.__table__
+            )
+        return self._blob_container
+```
+
+The blob container provides various methods to handle blobs: `put()` to create/upload blobs, `exists()` to verify if a blob already exists, `get()` to retrieve a blob and `delete()` to remvoe a blob from the database.
+
+The `post()` method on the `ImageList` class demonstrates how to generate a `sha1` digest from a JSON payload that contains a base64 encoded binary file and how to use it to create the blob on the Crate server.
+
+```python
+class ImageList(ImageResource):
+
+    def post(self):
+        ...
+        tmp = base64.b64decode(data.blob)
+        digest = hashlib.sha1(tmp).hexdigest()
+        f = TemporaryFile()
+        _ = f.write(tmp)
+        f.flush()
+        _ = f.seek(0)
+        created = self.blob_container.put(f, digest=digest)
+        ...
+```
+
+For a detailed documentation of all blob container methods see [Crate Python Blob API](http://crate-python.readthedocs.org/en/latest/blobs.html).
+
 
 ### Closing the connection
 

@@ -26,6 +26,7 @@ import base64
 import hashlib
 
 from datetime import datetime
+from tempfile import TemporaryFile
 
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
@@ -205,7 +206,7 @@ class PostList(PostResource):
         # json-serializable object array
         response = self.convert(self.cursor.description,
                                 self.cursor.fetchall())
-        return response, 200
+        return response, 201
 
 
 class Like(PostResource):
@@ -239,13 +240,22 @@ class Like(PostResource):
 class ImageResource(CrateResource):
 
     __name__ = 'Image'
-    __table__ = 'blob.guestbook_images'
+    __table__ = 'guestbook_images'
     CONTENT_TYPE = 'image/gif'
+    _blob_container = None
 
     def _blob_url(self, digest):
         return '{}://{}/_blobs/{}/{}'.format('http', CRATE_HOST,
-                                             self.__table__.split('.')[1],
+                                             self.__table__,
                                              digest)
+
+    @property
+    def blob_container(self):
+        if not self._blob_container:
+            self._blob_container = self.connection.get_blob_container(
+                self.__table__
+            )
+        return self._blob_container
 
 
 class Image(ImageResource):
@@ -255,17 +265,10 @@ class Image(ImageResource):
     """
 
     def get(self, digest):
-        self.cursor.execute("""
-            SELECT digest, last_modified
-            FROM {}
-            WHERE digest = ?
-        """.format(self.__table__), (digest,))
-        res = self.cursor.fetchall()
-        if self.cursor.rowcount == 1:
-            content = None
-            blob_url = self._blob_url(digest)
-            with urlopen(blob_url) as fp:
-                content = fp.read()
+        if self.blob_container.exists(digest):
+            content = b''
+            for chunk in self.blob_container.get(digest):
+                content += chunk
             response = make_response(content, 200)
             response.headers['Content-Type'] = self.CONTENT_TYPE
             return response
@@ -273,28 +276,9 @@ class Image(ImageResource):
             return self.not_found(digest=digest)
 
     def delete(self, digest):
-        self.cursor.execute("""
-            SELECT digest, last_modified
-            FROM {}
-            WHERE digest = ?
-        """.format(self.__table__), (digest,))
-        res = self.cursor.fetchall()
-        if self.cursor.rowcount == 1:
-            # generate blob url
-            blob_url = self._blob_url(digest)
-            # default response status
-            code = 204
-            try:
-                # perform DELETE request on Crate
-                req = Request(blob_url, method='DELETE')
-                with urlopen(req) as res:
-                    # set success response
-                    response = dict(success=(res.status == 200))
-                    code = res.status
-            except HTTPError as e:
-                # return error response
-                return self.error(str(e), e.code)
-            return response, code
+        success = self.blob_container.delete(digest)
+        if success:
+            return dict(success=success), 204
         else:
             return self.not_found(digest=digest)
 
@@ -304,9 +288,6 @@ class ImageList(ImageResource):
     Resource for blob.guestbook_images
     Supported methods: POST, GET
     """
-
-    def __init__(self):
-        super(ImageList, self).__init__()
 
     def get(self):
         # query all records in blob table
@@ -332,22 +313,16 @@ class ImageList(ImageResource):
         tmp = base64.b64decode(data.blob)
         # calculate sha1 digest
         digest = hashlib.sha1(tmp).hexdigest()
-        # generate blob url
-        blob_url = self._blob_url(digest)
-        # default response status
-        code = 201
-        try:
-            # perform PUT request on Crate
-            req = Request(blob_url, data=tmp, method='PUT')
-            with urlopen(req) as res:
-                # set success response
-                response = dict(digest=digest, url=blob_url)
-                code = res.status
-        except HTTPError as e:
-            # return error response
-            return self.error(str(e), e.code)
-        except URLError as e:
-            return self.error(str(e), 500)
+        # write into temp file
+        f = TemporaryFile()
+        _ = f.write(tmp)
+        f.flush()
+        _ = f.seek(0)
+        # upload blob
+        created = self.blob_container.put(f, digest=digest)
+        # response json and status code
+        code = created and 201 or 409
+        response = dict(digest=digest, url=self._blob_url(digest))
         return response, code
 
 
