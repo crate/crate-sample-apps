@@ -22,11 +22,53 @@ project.
 Available example application backends are:
 
 * [x] Python (using [dbapi][2], [crate-pyton][3])
-* [ ] PHP (using [PDO][4], [crate-pdo][5])
+* [x] PHP (using [PDO][4], [crate-pdo][5])
 * [ ] Java (using [JDBC][6], [crate-jdbc][7])
 
 They are located inside their respective subfolders and contain both usage
 instructions and commented application code.
+
+### Download and install Crate.IO
+
+For all backends you will neeed to download and run Crate.IO first.
+This sample app requires `0.54.0` or higher. You can download it from our
+[CDN][8].
+
+After extracting the tarball run
+
+```console
+$ crate-*/bin/crate
+```
+
+to start a single instance which listens on HTTP port `4200` and transport port
+`4300` for incoming client requests.
+
+### Import country data
+
+Once the Crate instance in running you need to create the schema and import
+country data. You need [crash][9] (Crate Shell) to connect to Crate.
+
+```console
+$ crash < sql/schemas.sql
+$ crash -c "COPY guestbook.countries FROM '$(pwd)/sql/countries.json'"
+```
+
+## Develop
+
+```console
+$ cd tests
+$ python3.4 tests.py --help
+usage: Universal tests for example app backends [-h] [--port PORT]
+                                                [--host HOST]
+                                                [--protocol PROTOCOL]
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --port PORT          HTTP port on which the backend is listening.
+  --host HOST          Hostname or IP on which the backend is listening.
+  --protocol PROTOCOL  HTTP protocol of the backend.
+$ python3.4 tests.py
+```
 
 [1]: https://crate.io
 [2]: https://www.python.org/dev/peps/pep-0249/
@@ -35,3 +77,5 @@ instructions and commented application code.
 [5]: https://github.com/crate/crate-pdo
 [6]: http://www.oracle.com/technetwork/java/overview-141217.html
 [7]: https://github.com/crate/crate-jdbc
+[8]: https://cdn.crate.io/downloads/releases/
+[9]: https://github.com/crate/crash/
