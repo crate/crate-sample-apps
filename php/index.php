@@ -2,9 +2,6 @@
 require 'vendor/autoload.php';
 $config = parse_ini_file('app.ini');
 
-// META CONTENT TYPES
-define('CONTENT_TYPE_JSON', 'Content-type: application/json');
-
 class CrateResource extends \Slim\Slim
 {
   public $conn;
