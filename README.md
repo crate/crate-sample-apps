@@ -55,6 +55,12 @@ $ crash -c "COPY guestbook.countries FROM '$(pwd)/sql/countries.json'"
 
 ## Develop
 
+### Backend API Spec
+
+See [API SPEC](SPEC.md).
+
+### Running Integration Tests
+
 ```console
 $ cd tests
 $ python3.4 tests.py --help
