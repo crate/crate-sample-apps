@@ -5,10 +5,12 @@ $config = parse_ini_file('app.ini');
 class CrateResource extends \Slim\Slim
 {
   public $conn;
+  public $config;
 
   function __construct($config)
   {
     parent::__construct();
+    $this->config = $config;
     $this->conn = new Crate\PDO\PDO("{$config['db_dsn']}:{$config['db_port']}" , null, null, null);
   }
 
@@ -134,16 +136,61 @@ $app->put('/posts/:id/likes', function($id) use ($app) {
   }
 });
 
+// images
+
 $app->get('/images', function() use ($app) {
-	echo json_encode(array());
+	$qry = $app->conn->prepare("SELECT digest, last_modified FROM blob.guestbook_images");
+	$qry->execute();
+	$rows = $qry->fetchAll(PDO::FETCH_ASSOC);
+	echo json_encode($rows);
 });
 
 $app->post('/images', function() use ($app) {
-	echo json_encode(array());
+	if(!isset($_FILES['image'])) {
+		$app->error(415, "no file provided");
+		return;
+	} else if($_FILES['image']['type'] != $app->config['blob_mime']) {
+		$app->error(415, "{$_FILES['image']['type']} was provided, but {$app->config['blob_mime']} is required.");
+		return;
+	}
+	$image = file_get_contents($_FILES['image']['tmp_name']);
+	$content = $image; //base64_decode($image);
+	$digest = sha1($content);
+	$ch = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");                                                                     
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$result = curl_exec($ch);
+	$info = curl_getinfo($ch);
+	if($info['http_code'] !== "201") {
+		$app->error($info['http_code'], curl_error($ch));
+	} else {
+		$app->success($info['http_code'], array('success' => $result));
+	}
 });
 
 $app->get('/image/:digest', function($digest) use ($app) {
+	$ch = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
+	$result = curl_exec($ch);
+	if(!$result || is_bool($result)) {
+		$info = curl_getinfo($ch);
+		$app->error($info['http_code'], curl_error($ch));
+	} else {
+		header("Content-type: {$app->config['blob_mime']}");
+		echo $result;
+	}
+});
 
+$app->delete('/image/:digest', function($digest) use ($app) {
+	$ch = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+	$result = curl_exec($ch);
+	$info = curl_getinfo($ch);
+	if($info['http_code'] == "404") {
+		$app->error($info['http_code'], curl_error($ch));
+	} else {
+		$app->success($info['http_code'], array('success' => $result));
+	}
 });
 
 $app->run();
