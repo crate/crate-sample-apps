@@ -14,6 +14,10 @@ class CrateResource extends \Slim\Slim
     $this->conn = new Crate\PDO\PDO("{$config['db_dsn']}:{$config['db_port']}" , null, null, null);
   }
 
+  function __destruct() {
+    $this->conn = NULL;
+  }
+
   function argument_required($message) {
     $this->error(400, $message);
   }
@@ -157,7 +161,7 @@ $app->post('/images', function() use ($app) {
 	$content = $image; //base64_decode($image);
 	$digest = sha1($content);
 	$ch = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");                                                                     
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	$result = curl_exec($ch);
@@ -167,6 +171,7 @@ $app->post('/images', function() use ($app) {
 	} else {
 		$app->success($info['http_code'], array('success' => $result));
 	}
+  curl_close($ch);
 });
 
 $app->get('/image/:digest', function($digest) use ($app) {
@@ -179,6 +184,7 @@ $app->get('/image/:digest', function($digest) use ($app) {
 		header("Content-type: {$app->config['blob_mime']}");
 		echo $result;
 	}
+  curl_close($ch);
 });
 
 $app->delete('/image/:digest', function($digest) use ($app) {
@@ -191,6 +197,8 @@ $app->delete('/image/:digest', function($digest) use ($app) {
 	} else {
 		$app->success($info['http_code'], array('success' => $result));
 	}
+  curl_close($ch);
 });
 
 $app->run();
+?>
