@@ -40,6 +40,7 @@ from flask import (
 )
 from flask.ext.restful import Api, Resource
 from flask.ext.restful.reqparse import RequestParser
+from flask.ext.cors import CORS
 
 
 # app configuration
@@ -49,6 +50,8 @@ MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5mb because GIFs are big ;)
 # create Flask app
 app = Flask(__name__)
 app.config.from_object(__name__)
+# apply CORS headers to all responses
+CORS(app)
 
 
 class CrateResource(Resource):
@@ -155,6 +158,7 @@ class PostList(PostResource):
             SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
             WHERE within(p.user['location'], c.geometry)
+            ORDER BY p.created DESC
         """)
         # convert response from Crate into
         # json-serializable object array

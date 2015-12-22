@@ -2,3 +2,4 @@ crash
 crate
 flask
 flask-restful
+flask-cors
