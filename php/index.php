@@ -6,7 +6,7 @@ class CrateResource extends \Slim\Slim
 {
     public $conn;
     public $config;
-    
+
     function __construct($config)
     {
         parent::__construct();
@@ -18,17 +18,17 @@ class CrateResource extends \Slim\Slim
         $qry = $this->conn->prepare("REFRESH TABLE {$table}");
         $result = $qry->execute();
     }
-    
+
     function argument_required($message)
     {
         $this->error(400, $message);
     }
-    
+
     function not_found($message)
     {
         $this->error(404, $message);
     }
-    
+
     function error($status, $message, $contenttype = 'application/json')
     {
         $this->response->headers->set('Content-Type', $contenttype);
@@ -38,7 +38,7 @@ class CrateResource extends \Slim\Slim
             "status" => $status
         )));
     }
-    
+
     function success($status, $result, $contenttype = 'application/json')
     {
         $this->response->headers->set('Content-Type', $contenttype);
@@ -71,7 +71,7 @@ $app->get('/post/:id', function($id) use ($app)
     if(!$result) {
         $app->not_found("Post with id=\"{$id}\" not found");
     } else {
-        $app->success(200, $result);    
+        $app->success(200, $result);
     }
 })->name('post-get');
 /**
@@ -86,7 +86,7 @@ $app->post('/posts', function() use ($app)
     $user      = $data->user;
     $text      = $data->text;
     $image_ref = $data->image_ref;
-    
+
     if (empty($user)) {
         $app->argument_required('user parameter is required');
         return;
@@ -94,7 +94,7 @@ $app->post('/posts', function() use ($app)
         $app->argument_required('user name parameter is required');
         return;
     }
-    
+
     $id        = uniqid();
     $likeCount = 0;
     $qry       = $app->conn->prepare("INSERT INTO guestbook.posts (id, user, text, created, image_ref, like_count)
@@ -107,7 +107,7 @@ $app->post('/posts', function() use ($app)
     $qry->bindParam(5, $image_ref);
     $qry->bindParam(6, $likeCount);
     $state = $qry->execute();
-    
+
     if ($state) {
         $app->refreshTable('guestbook.posts');
         $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
@@ -138,7 +138,7 @@ $app->put('/post/:id', function($id) use ($app)
     $qry->bindParam(1, $data->text);
     $qry->bindParam(2, $id);
     $state = $qry->execute();
-    
+
     if ($state) {
         $app->refreshTable("guestbook.posts");
         $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
@@ -169,12 +169,12 @@ $app->delete('/post/:id', function($id) use ($app)
         $app->not_found("Post with id=\"{$id}\" not found");
         return;
     }
-        
+
 
     $qry = $app->conn->prepare("DELETE FROM guestbook.posts WHERE id=?");
     $qry->bindParam(1, $id);
     $state = $qry->execute();
-    
+
     if ($state) {
         $app->success(204, array(
             'success' => $state
@@ -195,7 +195,7 @@ $app->put('/post/:id/like', function($id) use ($app)
     $qry->bindParam(1, $id);
     $result = $qry->execute();
     $row    = $qry->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($row) {
         $qryU = $app->conn->prepare("UPDATE guestbook.posts SET like_count = like_count + 1 WHERE id=?");
         $qryU->bindParam(1, $id);
@@ -267,6 +267,7 @@ $app->post('/images', function() use ($app)
             'digest' => $digest
         ));
     }
+    curl_close($ch);
 })->name('image-post');
 
 /**
@@ -286,6 +287,7 @@ $app->get('/image/:digest', function($digest) use ($app)
         $app->response->setStatus(200);
         $app->response->write($result);
     }
+    curl_close($ch);
 })->name('image-get');
 
 /**
@@ -304,6 +306,8 @@ $app->delete('/image/:digest', function($digest) use ($app)
             'success' => $result
         ));
     }
+    curl_close($ch);
 })->name('image-delete');
 
 $app->run();
+?>
