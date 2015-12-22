@@ -2,3 +2,6 @@ python/env
 php/vendor/
 php/composer.phar
 php/composer.lock
+java/target/*
+java/java.iml
+java/.idea
