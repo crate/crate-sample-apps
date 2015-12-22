@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <meta charset="utf-8" />
+    <title>Crate.IO Guestbook Sample App</title>
+    <link type="text/css" rel="stylesheet" href="bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="custom.css" />
+    <script type="application/javascript" src="angular.js"></script>
+    <script type="application/javascript" src="app.js"></script>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="https://crate.io">Crate.IO</a></li>
+            <li role="presentation"><a href="https://github.com/crate/crate-sample-apps">Github</a></li>
+            <li role="presentation"><a href="https://crate.io/docs">Documentation</a></li>
+          </ul>
+        </nav>
+        <h3 class="text-muted">Guestbook</h3>
+      </div>
+
+      <div ng-controller="GuestbookController as guestbookCtlr">
+      <div class="row marketing">
+        <div class="col-lg-12">
+          <form>
+            <p class="alert alert-info"
+               role="alert"
+               ng-show="formdata.user.location === null">Waiting for location.
+              Please accept the browser to share your location!</p>
+            <input type="hidden"
+                   class="form-control"
+                   id="location"
+                   ng-model="formdata.user.location"
+                   placeholder="Waiting for location from browser ..." />
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text"
+                     class="form-control"
+                     id="name"
+                     ng-model="formdata.user.name"
+                     placeholder="Name" />
+            </div>
+            <div class="form-group">
+              <label for="text">Your message</label>
+              <textarea class="form-control"
+                        id="text"
+                        rows="4"
+                        ng-model="formdata.text"></textarea>
+            </div>
+            <div class="row">
+              <div class="form-group col-lg-6">
+                <label for="blob">Say it with a gif!</label>
+                <input type="file"
+                       id="blob"
+                       accept="image/gif"
+                       blob="imagedata" />
+                <p class="help-block">Only <em>gifs</em> are supported.</p>
+              </div>
+              <div class="form-group col-lg-6">
+                <button type="submit"
+                        class="btn btn-success btn-lg btn-block"
+                        ng-click="guestbookCtlr.submitForm()"
+                        ng-disabled="formdata.user.location === null || !formdata.user.name || !formdata.text">Submit your post!</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="row marketing">
+        <div class="col-lg-12">
+          <h2 class="post-item">{{ posts.length }}
+            <ng-pluralize count="posts.length"
+                          when="{'0': 'Posts', 'one':'Post', 'other': 'Posts'}"></ng-pluralize>
+          </h2>
+          <div class="alert alert-info"
+               ng-if="posts.length === 0">Be the first one to post something!</div>
+          <div class="post-list">
+            <div class="post-item"
+                 id="post-{{ post.id }}"
+                 ng-repeat="post in posts track by post.id"
+                 ng-include="'post.html'"></div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2015 Crate.IO</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+  </body>
+</html>

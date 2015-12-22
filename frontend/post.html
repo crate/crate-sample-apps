@@ -1,0 +1,28 @@
+<div>
+  <p class="lead">
+    <b>{{ post.user.name }}</b>
+    wrote on <em>{{ post.created | date:'MMM d, y h:mm a' }}</em>
+  </p>
+  <p ng-if="post.image_ref">
+    <img ng-src="{{ apiHost }}/image/{{ post.image_ref }}" />
+  </p>
+  <p class="lead">{{ post.text }}</p>
+  <p>Location: <span class="label label-info">{{ post.country }}</span></p>
+  <p class="pull-right">
+    <button type="button"
+            class="btn btn-sm btn-primary"
+            ng-click="guestbookCtlr.editPost(post)" disabled>Edit</button>
+    <button type="button"
+            class="btn btn-sm btn-danger"
+            ng-click="guestbookCtlr.deletePost(post)">Delete</button>
+  </p>
+  <p>
+    <button type="button"
+            class="btn btn-sm btn-default"
+            ng-click="guestbookCtlr.likePost(post)">
+      <span class="badge">{{ post.like_count }}</span>
+      <ng-pluralize count="post.like_count"
+                    when="{'0': 'Likes', 'one': 'Like', 'other': 'Likes'}"></ng-pluralize>
+    </button>
+  </p>
+</div>
