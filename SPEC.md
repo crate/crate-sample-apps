@@ -193,6 +193,41 @@ Returns HTTP status `204` if the post with given `id` was successfully deleted.
 Returns HTTP status `404` if the post with given `id` does not exist.
 
 
+### `PUT /post/<id>/like`
+
+Increments the likecount for a given post by one.
+
+#### Response:
+
+```json
+{
+    "area": {
+        "coordinates": [
+            [
+                [<double>, <double>],
+                ...
+            ]
+        ],
+        "type": "Polygon"
+    },
+    "country": <str>,
+    "created": <long>,
+    "id": <str>,
+    "image_ref": <str | null>,
+    "like_count": <int>,
+    "text": <str>,
+    "user": {
+        "location": [<double>, <double>],
+        "name": <str | null>
+    }
+}
+```
+
+Returns HTTP status `200` if the like_count of the post with the given `id` was sucessfully incremented.
+
+Returns HTTP status `404` if the post with given `id` does not exist.
+
+
 ## Images
 
 ### `POST /images`
