@@ -110,7 +110,7 @@ Update an existing post with given `id`.
 
 ```json
 {
-    "text": <str>,
+    "text": <str>
 }
 ```
 
@@ -226,6 +226,47 @@ Increments the likecount for a given post by one.
 Returns HTTP status `200` if the like_count of the post with the given `id` was sucessfully incremented.
 
 Returns HTTP status `404` if the post with given `id` does not exist.
+
+### `GET /search`
+
+Fetch a list of posts which text matches a given query string.
+
+#### Request:
+
+```json
+{
+    "query_string": <str>
+}
+```
+
+#### Response:
+
+```json
+[
+    {
+        "area": {
+            "coordinates": [
+                [
+                    [<double>, <double>],
+                    ...
+                ]
+            ],
+            "type": "Polygon"
+        },
+        "country": <str>,
+        "created": <long>,
+        "id": <str>,
+        "image_ref": <str | null>,
+        "like_count": <int>,
+        "text": <str>,
+        "user": {
+            "location": [<double>, <double>],
+            "name": <str | null>
+        }
+    },
+    ...
+]
+```
 
 
 ## Images
