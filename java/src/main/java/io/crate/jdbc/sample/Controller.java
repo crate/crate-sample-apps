@@ -124,7 +124,8 @@ public class Controller {
             }
 
             byte[] decoded = Base64.getDecoder().decode((String) blobMap.get("blob"));
-            Map<String, String> responseMap = model.insertBlob(DigestUtils.shaHex(decoded), decoded);
+            String digest = DigestUtils.shaHex(decoded);
+            Map<String, String> responseMap = model.insertBlob(digest, decoded);
 
             response.status(Integer.parseInt(responseMap.get("status")));
             return responseMap;

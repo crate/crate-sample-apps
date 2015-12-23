@@ -53,7 +53,7 @@ public class DataProvider {
                 "SELECT p.*, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
                 "WHERE within(p.user['location'], c.geometry)" +
-                "ORDER BY created DESC", POST_TABLE, COUNTRIES_TABLE));
+                "ORDER BY p.created DESC", POST_TABLE, COUNTRIES_TABLE));
         ResultSet rs = statement.executeQuery();
         return resultSetToListOfMaps(rs);
     }
@@ -111,8 +111,8 @@ public class DataProvider {
     public Map updatePost(String id, String val) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "UPDATE %s " +
-                        "SET text = ? " +
-                        "WHERE id = ?", POST_TABLE));
+                "SET text = ? " +
+                "WHERE id = ?", POST_TABLE));
         statement.setString(1, val);
         statement.setString(2, id);
         if (statement.executeUpdate() == 0) {
@@ -126,8 +126,8 @@ public class DataProvider {
     public Map incrementLike(String id) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "UPDATE %s " +
-                        "SET like_count = like_count + 1 " +
-                        "WHERE id = ?", POST_TABLE));
+                "SET like_count = like_count + 1 " +
+                "WHERE id = ?", POST_TABLE));
         statement.setString(1, id);
         if (statement.executeUpdate() == 0) {
             return ImmutableMap.of();
@@ -148,8 +148,8 @@ public class DataProvider {
     public List<Map> getBlobs() throws SQLException {
         ResultSet rs = connection.createStatement().executeQuery(String.format(
                 "SELECT digest, last_modified " +
-                        "FROM %s " +
-                        "ORDER BY 2 DESC", String.format("blob.%s", IMAGE_TABLE)));
+                "FROM %s " +
+                "ORDER BY 2 DESC", String.format("blob.%s", IMAGE_TABLE)));
         return resultSetToListOfMaps(rs);
     }
 
@@ -185,10 +185,10 @@ public class DataProvider {
 
     private String blobUri(String digest) {
         return String.format(Locale.ENGLISH,
-                "http://%s:%s/_blobs/%s", host, httpPort, blobResourcePath(IMAGE_TABLE, digest));
+                "http://%s:%s/_blobs/%s", host, httpPort, blobResourceUri(IMAGE_TABLE, digest));
     }
 
-    private String blobResourcePath(String index, String digest) {
+    private String blobResourceUri(String index, String digest) {
         return String.format(Locale.ENGLISH, "%s/%s", index, digest);
     }
 
