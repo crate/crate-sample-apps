@@ -20,4 +20,4 @@ Start a local web server to test the app
 php -S localhost:8090
 ```
 
-Open the path in your prefered webbrowser `open "http://localhost:8090"`
+Open *http://localhost:8090* in a web browser.
