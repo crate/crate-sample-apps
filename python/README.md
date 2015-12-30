@@ -1,31 +1,26 @@
-# Python Backend
-
-This Python backend uses [Flask][1] as web framework and the [crate][2] Python
-library which is an implementation of the standard [Python DB API][3] (plus
-[SQLAlchemy][5] dialect).
+# The Python Sample App
+This Python backend uses [Flask][1] as web framework and the [crate][2] Python library, which is an implementation of the standard [Python DB API][3] (plus [SQLAlchemy][5] dialect).
 
 ## Requirements
 
-* Python 3 (>3.2)
-* [virtualenv][4]
+- Python 3 (>3.2)
+- [virtualenv][4]
 
 ## Usage
-
 ### Create virtualenv
 
-```console
-$ virtualenv env
-$ source ./venv/bin/activate
-$ ./env/bin/pip install -r requirements.txt
+```bash
+virtualenv env
+source ./env/bin/activate
+./env/bin/pip install -r requirements.txt
 ```
 
-See `README.txt` in root folder of the project on instructions how to create
-table schemas and populate country data.
+Read _README.txt_ in the root folder of the project for instructions on how to create table schemas and populate sample country data.
 
-### Run backend application
+### Run Backend Application
 
-```console
-$ ./venv/bin/python app.py
+```bash
+./env/bin/python app.py
 ```
 
 [1]: http://flask.pocoo.org/
