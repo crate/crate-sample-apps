@@ -1,6 +1,6 @@
 {
-    "require": {
-        "slim/slim": "2.*",
-        "crate/crate-pdo": "~0.3.0"
-    }
+  "require": {
+    "slim/slim": "2.*",
+    "crate/crate-pdo": "~0.3.0"
+  }
 }
