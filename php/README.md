@@ -1,19 +1,23 @@
-# create-sample-apps PHP
-
-
+# The PHP Sample App
 ## Get Source
 
-```git clone git@github.com:crate/crate-sample-apps.git```
-```cd php```
+```bash
+git clone git@github.com:crate/crate-sample-apps.git
+cd php
+```
 
+## Load Dependencies
+Install the application dependencies with [Composer](https://getcomposer.org/).
 
-## Load dependencies
+```bash
+composer install
+```
 
-Be sure to install composer.
-```composer install``` or ```composer.phar install```
+## Run PHP app
+Start a local web server to test the app
 
+```bash
+php -S localhost:8090
+```
 
-## Run php app
-
-Run a local webserver to test the app ```php -S localhost:8090```.
-Open the the path in your prefered webbrowser ```open "http://localhost:8090"```
+Open the path in your prefered webbrowser `open "http://localhost:8090"`
