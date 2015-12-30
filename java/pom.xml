@@ -21,12 +21,21 @@
 
     <repositories>
         <repository>
+            <id>maven-central</id>
+            <name>Maven Central</name>
+            <layout>default</layout>
+            <url>http://repo1.maven.org/maven2</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>central</id>
+        </repository>
+        <repository>
+            <id>bintray-central</id>
             <name>bintray</name>
             <url>http://dl.bintray.com/crate/crate</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
