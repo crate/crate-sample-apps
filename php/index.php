@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_STRICT);
+
 require 'vendor/autoload.php';
 $config = parse_ini_file('app.ini');
 
@@ -21,15 +23,15 @@ class CrateResource extends \Slim\Slim
 
     function argument_required($message)
     {
-        $this->error(400, $message);
+        $this->resource_error(400, $message);
     }
 
     function not_found($message)
     {
-        $this->error(404, $message);
+        $this->resource_error(404, $message);
     }
 
-    function error($status, $message, $contenttype = 'application/json')
+    function resource_error($status, $message, $contenttype = 'application/json')
     {
         $this->response->headers->set('Content-Type', $contenttype);
         $this->response->setStatus($status);
@@ -118,7 +120,7 @@ $app->post('/posts', function() use ($app)
         $result = $qry->fetchAll(PDO::FETCH_ASSOC);
         $app->success(201, $result);
     } else {
-        $app->error(500, $app->conn->errorInfo());
+        $app->resource_error(500, $app->conn->errorInfo());
     }
 })->name('post-post');
 
@@ -130,7 +132,7 @@ $app->put('/post/:id', function($id) use ($app)
     $data = json_decode($app->request->getBody());
 
     if(!$data || !isset($data->text)) {
-        $app->error(400, "parameter text is required");
+        $app->resource_error(400, "parameter text is required");
         return;
     }
 
@@ -148,7 +150,7 @@ $app->put('/post/:id', function($id) use ($app)
         $result = $qry->fetch(PDO::FETCH_ASSOC);
         $app->success(200, $result);
     } else {
-        $app->error(500, $app->conn->errorInfo());
+        $app->resource_error(500, $app->conn->errorInfo());
     }
 })->name('post-put');
 
@@ -210,7 +212,7 @@ $app->put('/post/:id/like', function($id) use ($app)
             $result = $qryS->fetch(PDO::FETCH_ASSOC);
             $app->success(200, $result);
         } else {
-            $app->error(500, 'update statement went wrong');
+            $app->resource_error(500, 'update statement went wrong');
         }
     } else {
         $app->not_found("Post with id=\"{$id}\" not found");
@@ -248,7 +250,7 @@ $app->post('/images', function() use ($app)
 {
     $data = json_decode($app->request->getBody());
     if (!isset($data->blob)) {
-        $app->error(400, "blob is required");
+        $app->resource_error(400, "blob is required");
         return;
     }
     $content = base64_decode($data->blob);
@@ -260,7 +262,7 @@ $app->post('/images', function() use ($app)
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
     if ($info['http_code'] != "201") {
-        $app->error($info['http_code'], curl_error($ch));
+        $app->resource_error($info['http_code'], curl_error($ch));
     } else {
         $app->success($info['http_code'], array(
             'url' => "{$app->config['blob_url']}guestbook_images/{$digest}",
@@ -279,10 +281,10 @@ $app->get('/image/:digest', function($digest) use ($app)
     $result = curl_exec($ch);
     if (!$result || is_bool($result)) {
         $info = curl_getinfo($ch);
-        $app->error($info['http_code'], "Image with digest=\"{$digest}\" not found");
+        $app->resource_error($info['http_code'], "Image with digest=\"{$digest}\" not found");
     } else {
         $app->response->headers->set("Content-Type", "image/gif");
-        $app->response->headers->set("Content-length", strlen($result));
+        $app->response->headers->set("Content-Length", strlen($result));
         $app->response->setStatus(200);
         $app->response->write($result);
     }
@@ -298,7 +300,7 @@ $app->delete('/image/:digest', function($digest) use ($app)
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
     if ($info['http_code'] == "404") {
-        $app->error($info['http_code'], "Image with digest=\"{$digest}\" not found");
+        $app->resource_error($info['http_code'], "Image with digest=\"{$digest}\" not found");
     } else {
         $app->success($info['http_code'], array(
             'success' => $result
