@@ -1,5 +1,7 @@
 # Backend API Spec for Crate Sample App
+
 ## Content Type
+
 ### Requests
 The API uses JSON for requests and responses. This means that all requests that contain a payload (`POST` and `PUT` requests) must have the `Content-Type` and `Accept` headers set to `application/json`.
 
@@ -14,6 +16,7 @@ Content-Type: application/json
 ```
 
 ## Posts
+
 ### `POST /posts`
 Create a new post.
 
@@ -180,8 +183,10 @@ Returns HTTP status `204` if the post with given `id` was successfully deleted.
 
 Returns HTTP status `404` if the post with given `id` does not exist.
 
+## Like
+
 ### `PUT /post/<id>/like`
-Increments the likecount for a given post by one.
+Increments the like count for a given post by one.
 
 #### Response:
 
@@ -212,6 +217,8 @@ Increments the likecount for a given post by one.
 Returns HTTP status `200` if the `like_count` of the post with the given `id` was sucessfully incremented.
 
 Returns HTTP status `404` if the post with given `id` does not exist.
+
+## Search
 
 ### `GET /search`
 Fetch a list of posts with text that matches a given query string.
@@ -254,6 +261,7 @@ Fetch a list of posts with text that matches a given query string.
 ```
 
 ## Images
+
 ### `POST /images`
 Create/upload a new image.
 
