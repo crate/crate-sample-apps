@@ -278,6 +278,9 @@ Create/upload a new image.
 
 Returns HTTP status `201` if the image was successfully created/uploaded.
 
+The ``url`` points to the URL at which to retrieve the image via this REST API.
+It is recommended to only include the path in that url.
+
 Returns HTTP status `409` (Conflict) if a blob with the same digest already exists.
 
 ### `GET /images`

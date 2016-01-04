@@ -268,7 +268,7 @@ class ImagesTestCase(CrateTestCase):
         self.assertEqual(d['digest'],
                          '27ee51bf00e6d7379b902c9ee05ec9f9d56722b4')
         self.assertEqual(d['url'],
-                         'http://localhost:4200/_blobs/guestbook_images/27ee51bf00e6d7379b902c9ee05ec9f9d56722b4')
+                         '/image/27ee51bf00e6d7379b902c9ee05ec9f9d56722b4')
 
         res, code = self.req('POST', '/images', data=payload)
         self.assertEqual(code, 409)
