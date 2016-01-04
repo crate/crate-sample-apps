@@ -280,7 +280,11 @@ class ImagesTestCase(CrateTestCase):
             self.assertEqual(response.status, 200)
             h = response.headers
             self.assertEqual(h['Content-Type'], 'image/gif')
-            self.assertEqual(h['Content-Length'], '1702902')
+            if h['Transfer-Encoding'] == "chunked":
+                image_content = response.read()
+                self.assertEqual(len(image_content), 1702902)
+            else:
+                self.assertEqual(h['Content-Length'], '1702902')
 
         invalid_digest = '0' * 40
         res, code = self.req('GET', '/image/{}'.format(invalid_digest))

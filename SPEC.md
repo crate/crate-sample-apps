@@ -309,6 +309,8 @@ Content-Type: image/gif
 
 Returns HTTP status `200` if the image with given `digest` was found.
 
+The response may be sent with ``Transfer-Encoding: chunked``.
+
 Returns HTTP status `404` if the image with given `digest` does not exist.
 
 ### `DELETE /image/<digest>`
