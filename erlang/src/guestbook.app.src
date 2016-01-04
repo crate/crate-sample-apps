@@ -1,0 +1,22 @@
+{application, 'guestbook',
+ [{description, "Guestbook REST API - a Crate sample application using the craterl client"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {mod, {'guestbook_app', []}},
+  {applications,
+   [kernel,
+    stdlib,
+    craterl,
+    cowboy
+   ]},
+  {env,[
+    {crate_hosts, ["localhost:4200"]},
+    {listen_port, 8080}
+  ]},
+  {modules, []},
+  {contributors, ["Matthias Wahl"]},
+  {licenses, ["Apache 2.0"]},
+  {links, [
+    {"Github", "https://github.com/crate/crate-sample-apps"}
+  ]}
+ ]}.
