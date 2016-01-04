@@ -171,13 +171,7 @@ Returns HTTP status `404` if the post with given `id` does not exist.
 ### `DELETE /post/<id>`
 Delete a post with given `id`.
 
-#### Response:
-
-```json
-{
-    "success": <bool>
-}
-```
+#### No Response
 
 Returns HTTP status `204` if the post with given `id` was successfully deleted.
 
@@ -320,20 +314,14 @@ Returns HTTP status `404` if the image with given `digest` does not exist.
 ### `DELETE /image/<digest>`
 Delete an image with given `digest`.
 
-#### Response:
-
-```json
-{
-  "success": <bool>
-}
-```
+#### No Response
 
 Returns HTTP status `204` if the image with given `digest` was successfully deleted.
 
 Returns HTTP status `404` if the image with given `digest` does not exist.
 
 ## Error Responses
-Error responses contain an error message and an error code (which is the same as the HTTP response status.
+Error responses contain an error message and an error code (which is the same as the HTTP response status).
 
 ```json
 {
