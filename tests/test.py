@@ -82,6 +82,27 @@ class CrateTestCase(unittest.TestCase):
         print('>>> {} {}'.format(blue(method), path))
         r = Request(self.get_url(path), data=payload,
                     method=method, headers=headers)
+        return self.do_request(r)
+
+    def _sql(self, stmt, args=None, bulk_args=None,
+             url='http://localhost:4200/_sql'):
+        data = dict(
+            stmt = stmt
+        )
+        if args is not None and len(args):
+            data['args'] = args
+        if bulk_args is not None and len(bulk_args):
+            data['bulk_args'] = bulk_args
+        payload = json.dumps(data).encode('utf-8')
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'CrateTestCase/0.1',
+        }
+        r = Request(url, data=payload, method='POST', headers=headers)
+        return self.do_request(r)
+
+    def do_request(self, r):
         try:
             with urlopen(r) as response:
                 return response.read().decode('utf-8'), response.status
@@ -114,21 +135,34 @@ class CrateTestCase(unittest.TestCase):
 
 class PostsTestCase(CrateTestCase):
 
+    TEXTS = [
+        "One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin.",
+        "He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections.",
+        "The bedding was hardly able to cover it and seemed ready to slide off any moment.",
+        "His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked.",
+        "\"What's happened to me?\" he thought. It wasn't a dream.",
+    ]
+
+    def setUp(self):
+        # clean posts table only
+        self._sql(stmt='DELETE FROM guestbook.posts')
+
     def test_posts(self):
         post_id = self._create_post()
         self._retrieve_post(post_id)
         self._update_post(post_id)
         self._like_post(post_id)
         self._delete_post(post_id)
+        self._search_posts()
 
-    def _create_post(self):
+    def _create_post(self, text='Far far away, behind the word mountains ...'):
         # request without POST data
         res, code = self.req('POST', '/posts')
         self.assertArgumentRequired(res, code, 'text')
 
         # request with POST data
         payload = dict(
-            text = 'Far far away, behind the word mountains ...',
+            text = text,
             user = dict(
                 name = 'Alex',
                 location = [9.74379 , 47.4124],
@@ -191,6 +225,25 @@ class PostsTestCase(CrateTestCase):
 
         res, code = self.req('DELETE', '/post/{}'.format(post_id))
         self.assertPostNotFound(res, code, id=post_id)
+
+    def _search_posts(self):
+        for t in self.TEXTS:
+            self._create_post(text=t)
+
+        # verify all posts are available
+        res, code = self.req('GET', '/posts')
+        d = json.loads(res)
+        self.assertEqual(code, 200)
+        self.assertEqual(len(d), len(self.TEXTS))
+
+        # search for word "his"
+        payload = dict(
+            query_string = "his",
+        )
+        res, code = self.req('POST', '/search', payload)
+        self.assertEqual(code, 200)
+        content = json.loads(res)
+        self.assertEqual(len(content), 3)
 
 
 class ImagesTestCase(CrateTestCase):

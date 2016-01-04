@@ -241,6 +241,35 @@ class Like(PostResource):
         return self.not_found(id=id)
 
 
+class Search(PostResource):
+    """
+    Resource for performing fulltext search on guestbook.posts
+    Supported methods: POST
+    """
+
+    def post(self):
+        # parse incoming POST data
+        reqparse = RequestParser()
+        reqparse.add_argument('query_string', type=str, location='json')
+        data = reqparse.parse_args()
+        # check for required data
+        if not data.query_string:
+            return self.argument_required('query_string')
+        self.cursor.execute("""
+            SELECT p.*, p._score AS _score,
+              c.name AS country, c.geometry AS area
+            FROM guestbook.posts AS p, guestbook.countries AS c
+            WHERE within(p.user['location'], c.geometry)
+              AND match(text, ?)
+            ORDER BY _score DESC
+        """, (data.query_string,))
+        # convert response from Crate into
+        # json-serializable object array
+        response = self.convert(self.cursor.description,
+                                self.cursor.fetchall())
+        return response, 200
+
+
 class ImageResource(CrateResource):
 
     __name__ = 'Image'
@@ -340,6 +369,7 @@ def run():
     api.add_resource(PostList, '/posts', endpoint='posts')
     api.add_resource(Post, '/post/<id>', endpoint='post')
     api.add_resource(Like, '/post/<id>/like', endpoint='like')
+    api.add_resource(Search, '/search', endpoint='search')
     api.add_resource(ImageList, '/images', endpoint='images')
     api.add_resource(Image, '/image/<digest>', endpoint='image')
     app.run(host='localhost', port=8080, debug=True)
