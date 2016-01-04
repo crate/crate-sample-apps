@@ -9,7 +9,7 @@ The API uses JSON for requests and responses. This means that all requests that 
 All successful API calls return as content type `application/json`, except the `GET /image/<digest>` request.
 
 ```
-HTTP/1.0 ...
+HTTP/1.1 ...
 Content-Length: ...
 Content-Type: application/json
 ...
@@ -307,7 +307,7 @@ Retrieve an image with given `digest`.
 Returns a gif (`Content-Type: image/gif`).
 
 ```
-HTTP/1.0 200 OK
+HTTP/1.1 200 OK
 Content-Length: ...
 Content-Type: image/gif
 <binary-data>
