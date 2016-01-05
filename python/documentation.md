@@ -33,15 +33,15 @@ In the example application we store the connection as an app global and obtain a
 ```python
 class CrateResource(Resource):
 
-def __init__(self):
-	super(CrateResource, self).__init__()
-	self.cursor = self.connection.cursor()
+    def __init__(self):
+        super(CrateResource, self).__init__()
+        self.cursor = self.connection.cursor()
 
-@property
-def connection(self):
-	if not 'conn' in app_globals:
-	   app_globals.conn = connect(app.config['CRATE_HOST'], error_trace=True)
-	   return app_globals.conn
+    @property
+    def connection(self):
+        if not 'conn' in app_globals:
+            app_globals.conn = connect(app.config['CRATE_HOST'], error_trace=True)
+        return app_globals.conn
 ```
 
 To get a traceback from Crate in case of something wrong, we set the `error_trace` argument to `True`.
