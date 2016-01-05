@@ -72,7 +72,7 @@ $app->get('/post/:id', function($id) use ($app)
     $qry->bindParam(1, $id);
     $qry->execute();
     $result = $qry->fetch(PDO::FETCH_ASSOC);
-    if(!$result) {
+    if (!$result) {
         $app->not_found("Post with id=\"{$id}\" not found");
     } else {
         $app->success(200, $result);
@@ -183,7 +183,7 @@ $app->delete('/post/:id', function($id) use ($app)
     $state = $qry->execute();
 
     if ($state) {
-      $app->success(204, "");
+      $app->response->setStatus(204);
     } else {
       // nothing deleted?
       $app->not_found("Post with id=\"{$id}\" not deleted");
@@ -245,8 +245,8 @@ $app->get('/images', function() use ($app)
 {
     $qry = $app->conn->prepare("SELECT digest, last_modified FROM blob.guestbook_images");
     $qry->execute();
-    $rows = $qry->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($rows);
+    $result = $qry->fetchAll(PDO::FETCH_ASSOC);
+    $app->success(200, $result);
 })->name('images-get');
 
 /**
@@ -267,7 +267,7 @@ $app->post('/images', function() use ($app)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
-    if ($info['http_code'] != "201") {
+    if ($info['http_code'] != 201) {
         $app->resource_error($info['http_code'], curl_error($ch));
     } else {
         $app->success($info['http_code'], array(
@@ -313,12 +313,13 @@ $app->delete('/image/:digest', function($digest) use ($app)
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
-    if ($info['http_code'] == "404") {
+    if ($info['http_code'] == 404) {
         $app->not_found("Image with digest=\"{$digest}\" not found");
+    } else if ($info['http_code'] == 204) {
+        $app->response->setStatus(204);
     } else {
-        $app->success($info['http_code'], array(
-            'success' => $result
-        ));
+        $err = curl_error($ch);
+        $app->resource_error(500, "Could not delete image: {$err}");
     }
 })->name('image-delete');
 

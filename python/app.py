@@ -139,7 +139,7 @@ class Post(PostResource):
             WHERE id = ?
         """.format(self.__table__), (id,))
         if self.cursor.rowcount == 1:
-            return dict(success=True), 204
+            return None, 204
         else:
             return self.not_found(id=id)
 
@@ -311,7 +311,7 @@ class Image(ImageResource):
     def delete(self, digest):
         success = self.blob_container.delete(digest)
         if success:
-            return dict(success=success), 204
+            return None, 204
         else:
             return self.not_found(digest=digest)
 
@@ -355,7 +355,10 @@ class ImageList(ImageResource):
         created = self.blob_container.put(f, digest=digest)
         # response json and status code
         code = created and 201 or 409
-        response = dict(digest=digest, url=self._blob_url(digest))
+        response = dict(
+            digest = digest,
+            url = '/image/{0}'.format(digest)
+        )
         return response, code
 
 
