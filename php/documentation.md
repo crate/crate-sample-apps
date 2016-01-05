@@ -1,4 +1,4 @@
-# Crate PDO Client Library Documentation
+# Crate.IO PDO Sample App Explanation
 ## Installation
 The PHP PDO client library for Crate.IO is available on [Packagist](https://packagist.org/packages/crate/crate-pdo) and can be installed by using [Composer](https://getcomposer.org/) or manually by adding a dependency to _composer.json_.
 
@@ -65,7 +65,7 @@ class CrateResource extends \Slim\Slim
 ```
 
 ### Executing Statements
-#### Executing single statements
+#### Executing Single Statements
 SQL statements can be executed using the `query()` method on the `PDOStatement` object that gets returned when the query is prepared. Each `query()` call results in a new HTTP request to the Crate server. The response of the request (such as `rowCount()`, `columnCount()`, etc.) is written directly to the `PDOStatement` object.
 
 ```php
@@ -91,11 +91,11 @@ $state = $qry->execute();
 
 For a prepared statement using named placeholders, the first argument is the parameter name in the form `:name`. For a prepared statement using question mark placeholders, this will be the **1-indexed** position of the parameter
 
-#### Fetching query results
+#### Fetching Query Results
 There are multiple ways to fetch data from row returning statements (DQL):
 
-- `fetch()` - Fetches the next row from a result set (see [PDOStatement::fetch](http://php.net/manual/de/pdostatement.fetch.php))
-- `fetchall()` - Returns an array containing all the result set rows (see [PDOStatement::fetchall](http://php.net/manual/de/pdostatement.fetchall.php))
+- `fetch()`: Fetches the next row from a result set (see [PDOStatement::fetch](http://php.net/manual/de/pdostatement.fetch.php))
+- `fetchall()`: Returns an array containing all the result set rows (see [PDOStatement::fetchall](http://php.net/manual/de/pdostatement.fetchall.php))
 
 ```php
 $qry = $conn->query("SELECT COUNT(*) FROM sys.nodes");
@@ -113,7 +113,7 @@ $app->success(200, $result);
 #### Handling BLOBs
 The Crate PDO does not have an implementation or API for handling BLOBs in Crate. So we need to use the [libcurl](http://php.net/manual/de/intro.curl.php) library supported by PHP since version 4.0.2. It's used to upload binaries via HTTP PUT onto a server or host.
 
-The sequence of uploading a binary file to a BLOB table on the Crate server is:
+The sequence for uploading a binary file to a BLOB table on the Crate server is:
 
 1. Read BLOB content
 2. Compute SHA-1 digest out of BLOB content
@@ -161,5 +161,5 @@ With Crate's BLOB API it's possible to handle BLOBs within different HTTP reques
 
 For detailed documentation on handling BLOB tables see [BLOB Support](https://crate.io/docs/reference/blob.html).
 
-#### Closing the connection
+#### Closing the Connection
 The connection to Crate remains active for the lifetime of the Crate PDO object. To close the connection, the variable that holds the PDO object needs to be assigned NULL. It destroys the object by ensuring that all remaining references to it are deleted.
