@@ -68,12 +68,10 @@ public class DataProvider {
 
     private final CheckedFunction<ResultSet, Map<String, Object>> resultSetToMap = rs -> {
         ResultSetMetaData rsMetaData = rs.getMetaData();
-        int columns = rsMetaData.getColumnCount();
+        int numCols = rsMetaData.getColumnCount();
         HashMap<String, Object> map = new HashMap<>();
-        while (rs.next()) {
-            for (int i = 1; i <= columns; i++) {
-                map.put(rsMetaData.getColumnName(i), rs.getObject(i));
-            }
+        for (int i = 1; i <= numCols; i++) {
+            map.put(rsMetaData.getColumnName(i), rs.getObject(i));
         }
         return map;
     };
@@ -85,7 +83,12 @@ public class DataProvider {
                 "WHERE within(p.user['location'], c.geometry) " +
                 "AND p.id = ?", POST_TABLE, COUNTRIES_TABLE));
         statement.setString(1, id);
-        return resultSetToMap.apply(statement.executeQuery());
+        ResultSet results = statement.executeQuery();
+        if (results.next()) {
+            return resultSetToMap.apply(results);
+        } else {
+            return ImmutableMap.of();
+        }
     }
 
     public List<Map<String, Object>> insertPost(Map<String, Object> post) throws SQLException {
@@ -190,6 +193,18 @@ public class DataProvider {
 
     private String blobResourceUri(String index, String digest) {
         return String.format(Locale.ENGLISH, "%s/%s", index, digest);
+    }
+
+    public List<Map<String, Object>> searchPosts(String query) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(String.format(
+                "SELECT p.*, p._score as _score, c.name as country, c.geometry as area " +
+                "FROM %s AS p, %s AS c " +
+                "WHERE within(p.user['location'], c.geometry)" +
+                "AND match(text, ?) " +
+                "ORDER BY _score DESC", POST_TABLE, COUNTRIES_TABLE));
+        statement.setString(1, query);
+        ResultSet results = statement.executeQuery();
+        return resultSetToListOfMaps(results);
     }
 
     @FunctionalInterface
