@@ -1,5 +1,4 @@
-# Crate Python Client Library Documentation
-
+# Crate.IO JDBC Sample App Explanation
 ## Installation
 The Python client library for Crate is available on [PyPi](https://pypi.python.org/pypi/crate) and can be installed using `pip`.
 
@@ -22,7 +21,7 @@ from crate.client import connect
 connection = connect('SERVER_IP:4200')
 ```
 
-In order to comply to the [PEP 0249](https://www.python.org/dev/peps/pep-0249/) (Python Database API Specification v2.0) the `CrateConnection` object provides a cursor factory via the `cursor()` method.
+To comply to the [PEP 0249](https://www.python.org/dev/peps/pep-0249/) (Python Database API Specification v2.0) the `CrateConnection` object provides a cursor factory via the `cursor()` method.
 
 ```python
 cursor = connection.cursor()
@@ -52,19 +51,19 @@ SQL statements can be executed using the `execute()` method on the cursor. Each 
 
 ```python
 cursor.execute("""
-	CREATE TABLE guestbook.posts (
-	    id STRING,
-	    text STRING INDEX USING FULLTEXT WITH (analyzer='english'),
-	    user OBJECT('strict') AS (
-	        name STRING,
-	        location GEO_SHAPE
-	    ),
-	    image_ref STRING
-	)""")
+    CREATE TABLE guestbook.posts (
+        id STRING,
+        text STRING INDEX USING FULLTEXT WITH (analyzer='english'),
+        user OBJECT('strict') AS (
+            name STRING,
+            location GEO_SHAPE
+        ),
+        image_ref STRING
+    )""")
 print('CREATE TABLE took {}ms'.format(cursor.duration))
 ```
 
-`execute()` allows parameter substitution. Parameters must be passed as a tuple as the second argument of the method.
+The `execute()` method allows for parameter substitution. Parameters must be passed using a tuple as the second argument of the method.
 
 ```python
 cursor.execute("""
@@ -102,7 +101,7 @@ class PostList(PostResource):
 ```
 
 #### Executing Multiple Statements (Bulk Operations)
-Parameter substitution is also possible when executing multiple statements. This can be done using the `executemany()` method. The second argument requires a list of tuples where each tuple represents the parameter of a single statement.
+Parameter substitution is also possible when executing multiple statements using the `executemany()` method. The second argument requires a list of tuples where each tuple represents the parameter of a single statement.
 
 ```python
 cursor.executemany("""
@@ -120,9 +119,9 @@ cursor.executemany("""
 ### Fetching Query Results
 To fetch data from row returning statements (DQL statements) there are multiple methods:
 
-- `fetchone()` - Fetch next row of result set
-- `fetchmany()` - Fetch next x rows of result set
-- `fetchall()` - Fetch all remaining rows of result set
+- `fetchone()`: Fetch next row of result set
+- `fetchmany()`: Fetch next x rows of result set
+- `fetchall()`: Fetch all remaining rows of result set
 
 These methods can be called after `execute()` to retrieve rows. For detailed documentation read [PEP 0249 Cursor methods](https://www.python.org/dev/peps/pep-0249/#cursor-methods).
 
@@ -183,10 +182,10 @@ class ImageResource(CrateResource):
 
 The blob container provides various methods to handle blobs:
 
-- `put()` - To create/upload blobs
-- `exists()` - To verify if a blob already exists
-- `get()` - To retrieve a blob
-- `delete()` - To remvoe a blob from the database
+- `put()`: To create/upload blobs
+- `exists()`: To verify if a blob already exists
+- `get()`: To retrieve a blob
+- `delete()`: To remove a blob from the database
 
 The `post()` method on the `ImageList` class demonstrates how to generate a `sha1` digest from a JSON payload that contains a base64 encoded binary file and how to use it to create the blob on the Crate cluster.
 
