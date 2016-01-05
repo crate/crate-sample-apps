@@ -1,4 +1,4 @@
-# The JDBC Sample App
+# Getting Started with the Crate.IO JDBC Sample App
 This Crate JDBC backend uses [Spark][1] as web framework and the Crate [JDBC driver][2].
 
 ## Requirements

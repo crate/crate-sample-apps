@@ -1,4 +1,4 @@
-# The Python Sample App
+# Getting Started with the Crate.IO Python Sample App
 This Python backend uses [Flask][1] as web framework and the [crate][2] Python library, which is an implementation of the standard [Python DB API][3] (plus [SQLAlchemy][5] dialect).
 
 ## Requirements

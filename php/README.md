@@ -1,4 +1,4 @@
-# The PHP Sample App
+# Getting Started with the Crate.IO PHP Sample App
 ## Get Source
 
 ```bash
