@@ -214,8 +214,8 @@ Returns HTTP status `404` if the post with given `id` does not exist.
 
 ## Search
 
-### `GET /search`
-Fetch a list of posts with text that matches a given query string.
+### `POST /search`
+Issue a search request to fetch a list of posts whose ``text`` matches a given query string.
 
 #### Request:
 
