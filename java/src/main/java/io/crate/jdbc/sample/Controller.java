@@ -42,17 +42,17 @@ public class Controller {
         post("/posts", (request, response) -> {
             String body = request.body();
             if (body.isEmpty()) {
-                return argumentRequired(response, "Request \"body\" is required");
+                return argumentRequired(response, "Request body is required");
             }
 
             Map post = gson.fromJson(body, Map.class);
             if (!post.containsKey("text")) {
-                return argumentRequired(response, "Request \"text\" is required");
+                return argumentRequired(response, "Argument \"text\" is required");
             }
 
             Map user = (Map) post.get("user");
             if (!user.containsKey("location")) {
-                return argumentRequired(response, "Request \"location\" is required");
+                return argumentRequired(response, "Argument \"location\" is required");
             }
             response.status(CREATED);
             return model.insertPost(post);
@@ -71,12 +71,12 @@ public class Controller {
         put("/post/:id", (request, response) -> {
             String body = request.body();
             if (body.isEmpty()) {
-                return argumentRequired(response, "Request \"body\" is required");
+                return argumentRequired(response, "Request body is required");
             }
 
             Map post = gson.fromJson(body, Map.class);
             if (!post.containsKey("text")) {
-                return argumentRequired(response, "Request \"text\" is required");
+                return argumentRequired(response, "Argument \"text\" is required");
             }
 
             String id = request.params(":id");
@@ -115,12 +115,12 @@ public class Controller {
         post("/images", (request, response) -> {
             String body = request.body();
             if (body.isEmpty()) {
-                return argumentRequired(response, "Request \"body\" is required");
+                return argumentRequired(response, "Request body is required");
             }
 
             Map blobMap = gson.fromJson(body, Map.class);
             if (!blobMap.containsKey("blob")) {
-                return argumentRequired(response, "Request \"blob\" is required");
+                return argumentRequired(response, "Argument \"blob\" is required");
             }
 
             byte[] decoded = Base64.getDecoder().decode((String) blobMap.get("blob"));
@@ -167,11 +167,11 @@ public class Controller {
         post("/search", (request, response) -> {
             String body = request.body();
             if (body.isEmpty()) {
-                return argumentRequired(response, "Request \"body\" is required");
+                return argumentRequired(response, "Request body is required");
             }
             Map bodyMap = gson.fromJson(body, Map.class);
             if (!bodyMap.containsKey("query_string")) {
-                return argumentRequired(response, "Request \"query_string\" is required");
+                return argumentRequired(response, "Argument \"query_string\" is required");
             }
             return model.searchPosts((String) bodyMap.get("query_string"));
         }, gson::toJson);
