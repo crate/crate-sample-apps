@@ -170,7 +170,7 @@ public class DataProvider {
         CloseableHttpResponse response = httpClient.execute(put);
         return ImmutableMap.of(
                 "digest", digest,
-                "url", uri,
+                "url", "/image/" + digest,
                 "status", String.valueOf(response.getStatusLine().getStatusCode())
         );
     }
