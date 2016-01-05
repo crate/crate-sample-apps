@@ -5,24 +5,24 @@ This Crate JDBC backend uses [Spark][1] as web framework and the Crate [JDBC dri
 - [Java 8][3]
 
 ## Usage
-To build and run the sample application we use [Apache Maven][4] build tool.
+To build and run the sample application we use the [Apache Maven][4] build tool.
 
-### Build the sample application
+### Build the Sample Application
 
 ```console
 mvn clean install
 ```
 
-See `README.txt` in root folder of the project on instructions how to create table schemas and populate country data.
+See _README.txt_ in root folder of the project for instructions on how to create table schemas and populate the country data.
 
-### Run backend application
-By default the sample application runs on port `8080`
+### Run Backend Application
+By default the sample application runs on port _8080_.
 
 ```console
-$ mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App"
+mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App"
 ```
 
-The port also can be specified explicitly:
+The port can be explicitly specified:
 
 ```console
 $ mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App"  -Dexec.args="8080"
