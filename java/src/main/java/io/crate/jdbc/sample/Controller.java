@@ -164,6 +164,17 @@ public class Controller {
             }
         }, gson::toJson);
 
+        post("/search", (request, response) -> {
+            String body = request.body();
+            if (body.isEmpty()) {
+                return argumentRequired(response, "Request \"body\" is required");
+            }
+            Map bodyMap = gson.fromJson(body, Map.class);
+            if (!bodyMap.containsKey("query_string")) {
+                return argumentRequired(response, "Request \"query_string\" is required");
+            }
+            return model.searchPosts((String) bodyMap.get("query_string"));
+        }, gson::toJson);
         exception(SQLException.class, (e, request, response) -> {
             response.status(INTERNAL_ERROR);
             response.body(e.getLocalizedMessage());

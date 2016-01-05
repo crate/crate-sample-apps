@@ -195,6 +195,18 @@ public class DataProvider {
         return String.format(Locale.ENGLISH, "%s/%s", index, digest);
     }
 
+    public List<Map<String, Object>> searchPosts(String query) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(String.format(
+                "SELECT p.*, p._score as _score, c.name as country, c.geometry as area " +
+                "FROM %s AS p, %s AS c " +
+                "WHERE within(p.user['location'], c.geometry)" +
+                "AND match(text, ?) " +
+                "ORDER BY _score DESC", POST_TABLE, COUNTRIES_TABLE));
+        statement.setString(1, query);
+        ResultSet results = statement.executeQuery();
+        return resultSetToListOfMaps(results);
+    }
+
     @FunctionalInterface
     public interface CheckedFunction<T, R> {
         R apply(T t) throws SQLException;
