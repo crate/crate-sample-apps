@@ -63,6 +63,10 @@ class CrateTestCase(unittest.TestCase):
                                                   options.host,
                                                   options.port)
 
+    def setUp(self, *args, **kwargs):
+        print('')
+        print(green(self.__class__.__name__))
+
     def get_url(self, path):
         return '{}{}'.format(self.options.fqn, path)
 
@@ -78,8 +82,7 @@ class CrateTestCase(unittest.TestCase):
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             })
-        print('\n')
-        print('>>> {} {}'.format(blue(method), path))
+        print('\n>>> {} {}'.format(blue(method), path))
         r = Request(self.get_url(path), data=payload,
                     method=method, headers=headers)
         return self.do_request(r)
@@ -105,9 +108,12 @@ class CrateTestCase(unittest.TestCase):
     def do_request(self, r):
         try:
             with urlopen(r) as response:
-                return response.read().decode('utf-8'), response.status
+                res = response.read().decode('utf-8')
+                print('<<< {} {}'.format(yellow(response.status), res))
+                return res, response.status
         except HTTPError as e:
             res = e.fp.read().decode('utf-8')
+            print('<<< {} {}'.format(yellow(e.code), res))
             return res, e.code
 
     def assertPostNotFound(self, res, code,
@@ -144,21 +150,25 @@ class PostsTestCase(CrateTestCase):
     ]
 
     def setUp(self):
+        super(PostsTestCase, self).setUp()
         # clean posts table only
         self._sql(stmt='DELETE FROM guestbook.posts')
 
     def test_posts(self):
-        post_id = self._create_post()
+        post_id = self._create_post(try_invalid=True)
         self._retrieve_post(post_id)
         self._update_post(post_id)
         self._like_post(post_id)
         self._delete_post(post_id)
         self._search_posts()
 
-    def _create_post(self, text='Far far away, behind the word mountains ...'):
-        # request without POST data
-        res, code = self.req('POST', '/posts')
-        self.assertArgumentRequired(res, code, 'text')
+    def _create_post(self,
+                     text='Far far away, behind the word mountains ...',
+                     try_invalid=False):
+        if try_invalid:
+            # request without POST data
+            res, code = self.req('POST', '/posts')
+            self.assertArgumentRequired(res, code, 'text')
 
         # request with POST data
         payload = dict(
