@@ -13,10 +13,12 @@ class CrateResource extends \Slim\Slim
     {
         parent::__construct();
         $this->config = $config;
-        $this->conn   = new Crate\PDO\PDO("{$config['db_host']}:{$config['db_port']}", null, null, null);
+        $dsn = "{$config['db_host']}:{$config['db_port']}";
+        $this->conn = new Crate\PDO\PDO($dsn, null, null, null);
     }
 
-    function refreshTable($table) {
+    function refreshTable($table)
+    {
         $qry = $this->conn->prepare("REFRESH TABLE {$table}");
         $result = $qry->execute();
     }
@@ -82,30 +84,34 @@ $app->get('/post/:id', function($id) use ($app)
 $app->post('/posts', function() use ($app)
 {
     $data      = json_decode($app->request->getBody());
-    // $user      = $data['user'];
-    // $text      = $data['text'];
-    // $image_ref = $data['image_ref'];
     $user      = $data->user;
     $text      = $data->text;
     $image_ref = $data->image_ref;
 
     if (empty($user)) {
-        $app->argument_required('user parameter is required');
+        $app->argument_required('Argument "user" is required');
         return;
     } else if (empty($user->name)) {
-        $app->argument_required('user name parameter is required');
+        $app->argument_required('Argument "name" is required');
+        return;
+    } else if (empty($user->location)) {
+        $app->argument_required('Argument "location" is required');
         return;
     }
 
     $id        = uniqid();
+    $now       = time();
     $likeCount = 0;
-    $qry       = $app->conn->prepare("INSERT INTO guestbook.posts (id, user, text, created, image_ref, like_count)
-            VALUES(?, ?, ?, ?, ?, ?)");
+    $qry       = $app->conn->prepare("INSERT INTO guestbook.posts (
+      id, user, text, created, image_ref, like_count
+    ) VALUES (
+      ?, ?, ?, ?, ?, ?
+    )");
     $qry->bindParam(1, $id);
     //$user = array('name' => 'test', 'location' => array(9.74379 , 47.4124));
     $qry->bindParam(2, $user);
     $qry->bindParam(3, $text);
-    $qry->bindParam(4, time());
+    $qry->bindParam(4, $now);
     $qry->bindParam(5, $image_ref);
     $qry->bindParam(6, $likeCount);
     $state = $qry->execute();
@@ -132,7 +138,7 @@ $app->put('/post/:id', function($id) use ($app)
     $data = json_decode($app->request->getBody());
 
     if(!$data || !isset($data->text)) {
-        $app->resource_error(400, "parameter text is required");
+        $app->argument_required('Argument "text" is required');
         return;
     }
 
@@ -160,27 +166,27 @@ $app->put('/post/:id', function($id) use ($app)
 $app->delete('/post/:id', function($id) use ($app)
 {
     if (empty($id)) {
-        $app->argument_required('post-id argument is empty');
+        $app->not_found('Please provide a post id: /post/<id>');
         return;
     }
     $qry = $app->conn->prepare("SELECT * FROM guestbook.posts WHERE id = ?");
     $qry->bindParam(1, $id);
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
-    if(!$result) {
+    if (!$result) {
         $app->not_found("Post with id=\"{$id}\" not found");
         return;
     }
-
 
     $qry = $app->conn->prepare("DELETE FROM guestbook.posts WHERE id=?");
     $qry->bindParam(1, $id);
     $state = $qry->execute();
 
     if ($state) {
-        $app->success(204, array(
-            'success' => $state
-        ));
+      $app->success(204, "");
+    } else {
+      // nothing deleted?
+      $app->not_found("Post with id=\"{$id}\" not deleted");
     }
 })->name('post-delete');
 
@@ -190,7 +196,7 @@ $app->delete('/post/:id', function($id) use ($app)
 $app->put('/post/:id/like', function($id) use ($app)
 {
     if (empty($id)) {
-        $app->argument_required('post-id parameter is empty');
+        $app->not_found('Please provide a post id: /post/<id>/like');
         return;
     }
     $qry = $app->conn->prepare("SELECT * FROM guestbook.posts WHERE id=?");
@@ -250,7 +256,7 @@ $app->post('/images', function() use ($app)
 {
     $data = json_decode($app->request->getBody());
     if (!isset($data->blob)) {
-        $app->resource_error(400, "blob is required");
+        $app->argument_required('Argument "blob" is required');
         return;
     }
     $content = base64_decode($data->blob);
@@ -265,7 +271,7 @@ $app->post('/images', function() use ($app)
         $app->resource_error($info['http_code'], curl_error($ch));
     } else {
         $app->success($info['http_code'], array(
-            'url' => "{$app->config['blob_url']}guestbook_images/{$digest}",
+            'url' => "/image/{$digest}",
             'digest' => $digest
         ));
     }
@@ -276,12 +282,16 @@ $app->post('/images', function() use ($app)
  */
 $app->get('/image/:digest', function($digest) use ($app)
 {
+    if (empty($digest)) {
+        $app->not_found('Please provide an image digest: /image/<digest>');
+        return;
+    }
     $ch     = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
     if (!$result || is_bool($result)) {
         $info = curl_getinfo($ch);
-        $app->resource_error($info['http_code'], "Image with digest=\"{$digest}\" not found");
+        $app->not_found("Image with digest=\"{$digest}\" not found");
     } else {
         $app->response->headers->set("Content-Type", "image/gif");
         $app->response->headers->set("Content-Length", strlen($result));
@@ -295,12 +305,16 @@ $app->get('/image/:digest', function($digest) use ($app)
  */
 $app->delete('/image/:digest', function($digest) use ($app)
 {
+    if (empty($digest)) {
+        $app->not_found('Please provide an image digest: /image/<digest>');
+        return;
+    }
     $ch = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
     if ($info['http_code'] == "404") {
-        $app->resource_error($info['http_code'], "Image with digest=\"{$digest}\" not found");
+        $app->not_found("Image with digest=\"{$digest}\" not found");
     } else {
         $app->success($info['http_code'], array(
             'success' => $result
@@ -308,5 +322,24 @@ $app->delete('/image/:digest', function($digest) use ($app)
     }
 })->name('image-delete');
 
+$app->post('/search', function() use ($app)
+{
+    $data = json_decode($app->request->getBody());
+    if (!isset($data->query_string)) {
+        $app->argument_required('Argument "query_string" is required');
+        return;
+    }
+    $qry = $app->conn->prepare("SELECT p.*, p._score as _score,
+              c.name as country, c.geometry as area
+            FROM guestbook.posts AS p, guestbook.countries AS c
+            WHERE within(p.user['location'], c.geometry)
+              AND match(p.text, ?)");
+    $qry->bindParam(1, $data->query_string);
+    $qry->execute();
+    $result = $qry->fetchAll(PDO::FETCH_ASSOC);
+    $app->success(200, $result);
+})->name('search');
+
 $app->run();
+
 ?>

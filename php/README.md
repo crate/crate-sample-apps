@@ -17,7 +17,7 @@ composer install
 Start a local web server to test the app
 
 ```bash
-php -S localhost:8090
+php -S localhost:8080
 ```
 
-Open *http://localhost:8090* in a web browser.
+Open *http://localhost:8080* in a web browser.
