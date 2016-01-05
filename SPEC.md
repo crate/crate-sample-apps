@@ -326,11 +326,12 @@ Returns HTTP status `204` if the image with given `digest` was successfully dele
 Returns HTTP status `404` if the image with given `digest` does not exist.
 
 ## Error Responses
-Error responses contain an error message and an error code (which is the same as the HTTP response status).
+Error responses contain an error message: ``error`` and an error code: ``status`` 
+(which is the same as the HTTP response status).
 
 ```json
 {
   "error": <str>,
-  "code": <int>
+  "status": <int>
 }
 ```
