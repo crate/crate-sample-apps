@@ -2,7 +2,6 @@ package io.crate.jdbc.sample;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import spark.Response;
@@ -92,13 +91,13 @@ public class Controller {
             String id = request.params(":id");
             if (model.deletePost(id)) {
                 response.status(NO_CONTENT);
-                JsonObject responseJson = new JsonObject();
-                responseJson.addProperty("success", true);
-                return responseJson;
+                return response;
             } else {
-                return notFound(response, String.format("Post with id=\"%s\" not found", id));
+                return gson.toJson(
+                        notFound(response, String.format("Post with id=\"%s\" not found", id))
+                );
             }
-        }, gson::toJson);
+        });
 
         put("/post/:id/like", (request, response) -> {
             String id = request.params(":id");
@@ -154,15 +153,14 @@ public class Controller {
             String digest = request.params(":digest");
             if (model.blobExists(digest)) {
                 CloseableHttpResponse closeableHttpResponse = model.deleteBlob(digest);
-                int status = closeableHttpResponse.getStatusLine().getStatusCode();
-                response.status(status);
-                JsonObject responseJson = new JsonObject();
-                responseJson.addProperty("success", status == OK);
-                return responseJson;
+                response.status(closeableHttpResponse.getStatusLine().getStatusCode());
+                return response;
             } else {
-                return notFound(response, String.format("Image with digest=\"%s\" not found", digest));
+                return gson.toJson(
+                        notFound(response, String.format("Image with digest=\"%s\" not found", digest))
+                );
             }
-        }, gson::toJson);
+        });
 
         post("/search", (request, response) -> {
             String body = request.body();
