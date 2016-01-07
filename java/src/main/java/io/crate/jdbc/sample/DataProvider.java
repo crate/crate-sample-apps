@@ -18,12 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class DataProvider {
 
@@ -31,14 +26,18 @@ public class DataProvider {
     private static final String COUNTRIES_TABLE = "guestbook.countries";
     private static final String IMAGE_TABLE = "guestbook_images";
 
-    private static String host = "localhost";
-    private static int transportPort = 4300;
-    private static int httpPort = 4200;
+    private static Properties properties;
+    private final String host;
+    private final int transportPort;
+    private final int httpPort;
 
     private CloseableHttpClient httpClient = HttpClients.createSystem();
     private Connection connection;
 
     public DataProvider() throws SQLException {
+        transportPort = Integer.parseInt(getProperty("crate.transport.port"));
+        httpPort = Integer.parseInt(getProperty("crate.http.port"));
+        host = getProperty("crate.host");
         try {
             Class.forName("io.crate.client.jdbc.CrateDriver");
             String hostAndPort = String.format(Locale.ENGLISH, "%s:%d", host, transportPort);
@@ -46,6 +45,23 @@ public class DataProvider {
         } catch (SQLException | ClassNotFoundException e) {
             throw new SQLException("Cannot connect to the database", e);
         }
+    }
+
+    public static String getProperty(String name) {
+        return properties().getProperty(name);
+    }
+
+    private static Properties properties() {
+        if (properties == null) {
+            try {
+                properties = new Properties();
+                properties.load(DataProvider.class.getResourceAsStream("/config.properties"));
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return properties;
     }
 
     public List<Map<String, Object>> getPosts() throws SQLException {

@@ -11,7 +11,7 @@ public class App {
         if (args.length == 1) {
             port(Integer.parseInt(args[0]));
         } else {
-            port(8080);
+            port(Integer.parseInt(DataProvider.getProperty("web.server.port")));
         }
         new Controller(new DataProvider());
     }
