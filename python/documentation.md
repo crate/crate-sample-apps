@@ -1,4 +1,4 @@
-# Crate.IO JDBC Sample App Explanation
+# Crate.IO Python Sample App Explanation
 ## Installation
 The Python client library for Crate is available on [PyPi](https://pypi.python.org/pypi/crate) and can be installed using `pip`.
 
