@@ -86,11 +86,15 @@ angular.module('app', [])
       image_ref: null
     };
     var locationCache = null;
+    var SEARCH_API = new Api('/search');
 
     $scope.posts = [];
     $scope.imagedata = null;
     $scope.formdata = angular.copy(EMPTY);
     $scope.apiHost = apiHost;
+    $scope.search = {
+      query_string: ''
+    };
 
     var init = function() {
       // try to get location from browser
@@ -103,6 +107,10 @@ angular.module('app', [])
         window.alert(e.message);
       });
       // load existing posts
+      loadPosts();
+    };
+
+    var loadPosts = function() {
       var api = new Api('/posts');
       api.get().then(function(response) {
         $scope.posts = response.data;
@@ -148,6 +156,27 @@ angular.module('app', [])
       })
     };
 
+    var searchPosts = function() {
+      SEARCH_API.post($scope.search).then(function(response) {
+        $scope.posts = response.data;
+      }, function(e) {
+        console.warn(e);
+        $scope.posts = [];
+      });
+    };
+
+    // watch search input
+    $scope.$watch(function(scope) {
+      return scope.search.query_string;
+    }, function(newVal, oldVal) {
+      if (newVal === '') {
+        loadPosts();
+      } else if (newVal != oldVal) {
+        searchPosts();
+      }
+    });
+
+
     // create new post
     this.submitForm = function() {
       if (!$scope.formdata.user.location) return;
@@ -192,6 +221,12 @@ angular.module('app', [])
       });
     };
 
+    // clear search form
+    this.clearSearch = function() {
+      $scope.search = {
+        query_string: ''
+      };
+    };
 
     // initialize controller
     init();

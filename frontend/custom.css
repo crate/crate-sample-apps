@@ -57,6 +57,11 @@ body {
   font-size: 21px;
 }
 
+/* Forms */
+form {
+  margin-bottom: 10px;
+}
+
 /* Supporting marketing content */
 .marketing {
   margin: 40px 0;
