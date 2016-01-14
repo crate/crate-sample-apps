@@ -11,8 +11,9 @@ The code and usage instructions are in the _frontend_ subfolder of this project.
 The example application backends available are:
 
 - [x] Python (using [dbapi][2], [crate-pyton][3])
-- [ ] PHP (using [PDO][4], [crate-pdo][5])
+- [x] PHP (using [PDO][4], [crate-pdo][5])
 - [x] Java (using [JDBC][6], [crate-jdbc][7])
+- [x] Erlang (using [Erlang][10], [craterl][11])
 
 They are inside their respective subfolders and contain both usage instructions and commented application code.
 
@@ -24,7 +25,7 @@ Once the Crate instance in running, create the schema and import country data. Y
 
 ```bash
 crash < sql/schemas.sql
-crash -c "COPY guestbook.countries FROM '/Users/chrisward/Workspace/crate-sample-apps/sql/countries.json'"
+crash -c "COPY guestbook.countries FROM 'PATH_TO_SAMLE_APPS/sql/countries.json'"
 ```
 
 ## Develop
@@ -47,3 +48,5 @@ python3.4 tests.py --host SERVER_IP --port 4200
 [7]: https://github.com/crate/crate-jdbc
 [8]: https://cdn.crate.io/downloads/releases/
 [9]: https://github.com/crate/crash/
+[10]: http://www.erlang.org/
+[11]: https://github.com/crate/craterl
