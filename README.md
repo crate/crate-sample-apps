@@ -25,7 +25,7 @@ Once the Crate instance in running, create the schema and import country data. Y
 
 ```bash
 crash < sql/schemas.sql
-crash -c "COPY guestbook.countries FROM 'PATH_TO_SAMLE_APPS/sql/countries.json'"
+crash -c "COPY guestbook.countries FROM '$(pwd)/sql/countries.json'"
 ```
 
 ## Develop
