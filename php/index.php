@@ -52,6 +52,8 @@ class CrateResource extends \Slim\Slim
 }
 
 $app = new CrateResource($config);
+// apply CORS headers to all responses
+$app->add(new \CorsSlim\CorsSlim());
 
 /**
  * Default action.

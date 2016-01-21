@@ -1,6 +1,7 @@
 {
   "require": {
     "slim/slim": "2.*",
+    "palanik/corsslim": "*",
     "crate/crate-pdo": "~0.3.0"
   }
 }
