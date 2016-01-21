@@ -102,7 +102,7 @@ $app->post('/posts', function() use ($app)
     }
 
     $id        = uniqid();
-    $now       = time();
+    $now       = time() * 1000;
     $likeCount = 0;
     $qry       = $app->conn->prepare("INSERT INTO guestbook.posts (
       id, user, text, created, image_ref, like_count
