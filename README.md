@@ -18,7 +18,7 @@ The example application backends available are:
 They are inside their respective subfolders and contain both usage instructions and commented application code.
 
 ### Download and Install Crate.IO
-For all backends you will need to install and run Crate.IO first. This sample app requires version **0.54.0** or higher. Several ways exist to get an instance of Crate running, visit our [Getting Started](https://crate.io/docs/getting-started/) section to find the one that works best for you.
+For all backends you will need to install and run Crate.IO first. This sample app requires version **0.54.1** or higher. Several ways exist to get an instance of Crate running, visit our [Getting Started](https://crate.io/docs/getting-started/) section to find the one that works best for you.
 
 ### Import Country Data
 Once the Crate instance in running, create the schema and import country data. You need [crash][9] (Crate Shell) to connect to Crate.
