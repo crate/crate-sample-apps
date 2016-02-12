@@ -37,6 +37,7 @@ from flask import (
     Flask,
     g as app_globals,
     make_response,
+    jsonify
 )
 from flask.ext.restful import Api, Resource
 from flask.ext.restful.reqparse import RequestParser
@@ -364,7 +365,7 @@ class ImageList(ImageResource):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(json.dumps({'error': 'Not found'}), 404)
+    return jsonify({'error': 'Not found'}), 404
 
 
 def run():
