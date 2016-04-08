@@ -10,7 +10,7 @@ The code and usage instructions are in the _frontend_ subfolder of this project.
 ## Backends
 The example application backends available are:
 
-- [x] Python (using [dbapi][2], [crate-pyton][3])
+- [x] Python (using [dbapi][2], [crate-python][3])
 - [x] PHP (using [PDO][4], [crate-pdo][5])
 - [x] Java (using [JDBC][6], [crate-jdbc][7])
 - [x] Erlang (using [Erlang][10], [craterl][11])
