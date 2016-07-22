@@ -88,7 +88,7 @@ boolean created = connection.createStatement().execute(
     "CREATE TABLE guestbook.posts (" +
     "    id STRING, " +
     "    text STRING INDEX USING FULLTEXT WITH (analyzer='english'), " +
-    "    user OBJECT('strict') AS ( " +
+    "    user OBJECT(strict) AS ( " +
     "        name STRING, " +
     "        location GEO_SHAPE " +
     "    ), " +
