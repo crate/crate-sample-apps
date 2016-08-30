@@ -1,7 +1,8 @@
 package io.crate.jdbc.sample;
 
-import io.crate.shade.com.google.common.collect.ImmutableList;
-import io.crate.shade.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -10,44 +11,43 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.postgresql.jdbc.PgResultSetMetaData;
+import org.postgresql.util.PGobject;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
-public class DataProvider {
+class DataProvider {
 
     private static final String POST_TABLE = "guestbook.posts";
     private static final String COUNTRIES_TABLE = "guestbook.countries";
     private static final String IMAGE_TABLE = "guestbook_images";
 
+    private final Gson gson = new Gson();
+
     private static Properties properties;
     private final String host;
-    private final int transportPort;
     private final int httpPort;
 
     private CloseableHttpClient httpClient = HttpClients.createSystem();
     private Connection connection;
 
-    public DataProvider() throws SQLException {
-        transportPort = Integer.parseInt(getProperty("crate.transport.port"));
+    DataProvider() throws SQLException {
+        int psqlPort = Integer.parseInt(getProperty("crate.psql.port"));
         httpPort = Integer.parseInt(getProperty("crate.http.port"));
         host = getProperty("crate.host");
         try {
-            Class.forName("io.crate.client.jdbc.CrateDriver");
-            String hostAndPort = String.format(Locale.ENGLISH, "%s:%d", host, transportPort);
-            connection = DriverManager.getConnection("crate://" + hostAndPort);
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(
+                    String.format(Locale.ENGLISH, "jdbc:postgresql://%s:%d/", host, psqlPort)
+            );
         } catch (SQLException | ClassNotFoundException e) {
             throw new SQLException("Cannot connect to the database", e);
         }
     }
 
-    public static String getProperty(String name) {
+    static String getProperty(String name) {
         return properties().getProperty(name);
     }
 
@@ -64,7 +64,7 @@ public class DataProvider {
         return properties;
     }
 
-    public List<Map<String, Object>> getPosts() throws SQLException {
+    List<Map<String, Object>> getPosts() throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "SELECT p.*, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
@@ -83,16 +83,22 @@ public class DataProvider {
     }
 
     private final CheckedFunction<ResultSet, Map<String, Object>> resultSetToMap = rs -> {
-        ResultSetMetaData rsMetaData = rs.getMetaData();
-        int numCols = rsMetaData.getColumnCount();
-        HashMap<String, Object> map = new HashMap<>();
-        for (int i = 1; i <= numCols; i++) {
-            map.put(rsMetaData.getColumnName(i), rs.getObject(i));
+        PgResultSetMetaData metaData = (PgResultSetMetaData) rs.getMetaData();
+        int resultSetSize = metaData.getColumnCount();
+
+        Map<String, Object> map = new HashMap<>(resultSetSize);
+        for (int i = 1; i <= resultSetSize; i++) {
+            Object value = rs.getObject(i);
+            if (metaData.getColumnTypeName(i).equals("json")) {
+                map.put(metaData.getColumnName(i), gson.fromJson((String) value, Map.class));
+            } else {
+                map.put(metaData.getColumnName(i), value);
+            }
         }
         return map;
     };
 
-    public Map<String, Object> getPost(String id) throws SQLException {
+    Map<String, Object> getPost(String id) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "SELECT p.*, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
@@ -107,27 +113,34 @@ public class DataProvider {
         }
     }
 
-    public List<Map<String, Object>> insertPost(Map<String, Object> post) throws SQLException {
+    List<Map<String, Object>> insertPost(Map<String, Object> post) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "INSERT INTO %s " +
                 "(id, user, text, image_ref, created, like_count) " +
                 "VALUES (?, ?, ?, ?, ?, ?)", POST_TABLE));
+
         String id = UUID.randomUUID().toString();
         statement.setString(1, id);
-        statement.setObject(2, post.get("user"));
-        statement.setObject(3, post.get("text"));
-        statement.setObject(4, post.get("image_ref"));
+
+        // objects can be streamed as json strings,
+        // https://crate.io/docs/reference/en/latest/protocols/postgres.html#jdbc
+        PGobject userObject = new PGobject();
+        userObject.setType("json");
+        userObject.setValue(gson.toJson(post.get("user")));
+        statement.setObject(2, userObject);
+
+        statement.setString(3, (String) post.get("text"));
+        statement.setString(4, (String) post.get("image_ref"));
         statement.setLong(5, System.currentTimeMillis());
         statement.setLong(6, 0);
         if (statement.executeUpdate() == 0) {
             return ImmutableList.of();
         }
-        connection.createStatement()
-                .execute(String.format("REFRESH TABLE %s", POST_TABLE));
+        connection.createStatement().execute(String.format("REFRESH TABLE %s", POST_TABLE));
         return ImmutableList.of(getPost(id));
     }
 
-    public Map<String, Object> updatePost(String id, String val) throws SQLException {
+    Map<String, Object> updatePost(String id, String val) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "UPDATE %s " +
                 "SET text = ? " +
@@ -137,12 +150,11 @@ public class DataProvider {
         if (statement.executeUpdate() == 0) {
             return ImmutableMap.of();
         }
-        connection.createStatement()
-                .execute(String.format("REFRESH TABLE %s", POST_TABLE));
+        connection.createStatement().execute(String.format("REFRESH TABLE %s", POST_TABLE));
         return getPost(id);
     }
 
-    public Map<String, Object> incrementLike(String id) throws SQLException {
+    Map<String, Object> incrementLike(String id) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "UPDATE %s " +
                 "SET like_count = like_count + 1 " +
@@ -151,12 +163,11 @@ public class DataProvider {
         if (statement.executeUpdate() == 0) {
             return ImmutableMap.of();
         }
-        connection.createStatement()
-                .execute(String.format("REFRESH TABLE %s", POST_TABLE));
+        connection.createStatement().execute(String.format("REFRESH TABLE %s", POST_TABLE));
         return getPost(id);
     }
 
-    public boolean deletePost(String id) throws SQLException {
+    boolean deletePost(String id) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "DELETE FROM %s " +
                 "WHERE id = ?", POST_TABLE));
@@ -164,7 +175,7 @@ public class DataProvider {
         return statement.executeUpdate() == 1;
     }
 
-    public List<Map<String, Object>> getBlobs() throws SQLException {
+    List<Map<String, Object>> getBlobs() throws SQLException {
         ResultSet rs = connection.createStatement().executeQuery(String.format(
                 "SELECT digest, last_modified " +
                 "FROM %s " +
@@ -172,12 +183,12 @@ public class DataProvider {
         return resultSetToListOfMaps(rs);
     }
 
-    public CloseableHttpResponse getBlob(String digest) throws IOException {
+    CloseableHttpResponse getBlob(String digest) throws IOException {
         HttpGet get = new HttpGet(blobUri(digest));
         return httpClient.execute(get);
     }
 
-    public Map<String, String> insertBlob(String digest, byte[] body) throws IOException {
+    Map<String, String> insertBlob(String digest, byte[] body) throws IOException {
         String uri = blobUri(digest);
         HttpPut put = new HttpPut(uri);
         if (body != null) {
@@ -191,12 +202,12 @@ public class DataProvider {
         );
     }
 
-    public CloseableHttpResponse deleteBlob(String digest) throws IOException {
+    CloseableHttpResponse deleteBlob(String digest) throws IOException {
         HttpDelete delete = new HttpDelete(blobUri(digest));
         return httpClient.execute(delete);
     }
 
-    public boolean blobExists(String digest) throws IOException {
+    boolean blobExists(String digest) throws IOException {
         HttpHead head = new HttpHead(blobUri(digest));
         CloseableHttpResponse response = httpClient.execute(head);
         return response.getStatusLine().getStatusCode() == 200;
@@ -211,7 +222,7 @@ public class DataProvider {
         return String.format(Locale.ENGLISH, "%s/%s", index, digest);
     }
 
-    public List<Map<String, Object>> searchPosts(String query) throws SQLException {
+    List<Map<String, Object>> searchPosts(String query) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "SELECT p.*, p._score as _score, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
@@ -224,8 +235,7 @@ public class DataProvider {
     }
 
     @FunctionalInterface
-    public interface CheckedFunction<T, R> {
+    interface CheckedFunction<T, R> {
         R apply(T t) throws SQLException;
     }
-
 }

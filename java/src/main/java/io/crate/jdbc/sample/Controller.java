@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static spark.Spark.*;
 
-public class Controller {
+class Controller {
 
     private final Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -27,7 +27,7 @@ public class Controller {
     private static final int CREATED = 201;
     private static final int OK = 200;
 
-    public Controller(final DataProvider model) {
+    Controller(final DataProvider model) {
 
         before(((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
@@ -44,12 +44,14 @@ public class Controller {
                 return argumentRequired(response, "Request body is required");
             }
 
-            Map post = gson.fromJson(body, Map.class);
+            //noinspection unchecked
+            Map<String, Object> post = gson.fromJson(body, Map.class);
             if (!post.containsKey("text")) {
                 return argumentRequired(response, "Argument \"text\" is required");
             }
 
-            Map user = (Map) post.get("user");
+            //noinspection unchecked
+            Map<String, Object> user = (Map) post.get("user");
             if (!user.containsKey("location")) {
                 return argumentRequired(response, "Argument \"location\" is required");
             }
@@ -59,7 +61,7 @@ public class Controller {
 
         get("/post/:id", (request, response) -> {
             String id = request.params(":id");
-            Map post = model.getPost(id);
+            Map<String, Object> post = model.getPost(id);
             if (post.isEmpty()) {
                 return notFound(response, (String.format("Post with id=\"%s\" not found", id)));
             }
@@ -73,13 +75,14 @@ public class Controller {
                 return argumentRequired(response, "Request body is required");
             }
 
-            Map post = gson.fromJson(body, Map.class);
+            //noinspection unchecked
+            Map<String, Object> post = gson.fromJson(body, Map.class);
             if (!post.containsKey("text")) {
                 return argumentRequired(response, "Argument \"text\" is required");
             }
 
             String id = request.params(":id");
-            Map updatePost = model.updatePost(id, (String) post.get("text"));
+            Map<String, Object> updatePost = model.updatePost(id, (String) post.get("text"));
             if (updatePost.isEmpty()) {
                 return notFound(response, (String.format("Post with id=\"%s\" not found", id)));
             }
@@ -101,7 +104,7 @@ public class Controller {
 
         put("/post/:id/like", (request, response) -> {
             String id = request.params(":id");
-            Map post = model.incrementLike(id);
+            Map<String, Object> post = model.incrementLike(id);
             if (post.isEmpty()) {
                 return notFound(response, (String.format("Post with id=\"%s\" not found", id)));
             }
@@ -117,7 +120,8 @@ public class Controller {
                 return argumentRequired(response, "Request body is required");
             }
 
-            Map blobMap = gson.fromJson(body, Map.class);
+            //noinspection unchecked
+            Map<String, Object> blobMap = gson.fromJson(body, Map.class);
             if (!blobMap.containsKey("blob")) {
                 return argumentRequired(response, "Argument \"blob\" is required");
             }
@@ -167,7 +171,9 @@ public class Controller {
             if (body.isEmpty()) {
                 return argumentRequired(response, "Request body is required");
             }
-            Map bodyMap = gson.fromJson(body, Map.class);
+
+            //noinspection unchecked
+            Map<String, Object> bodyMap = gson.fromJson(body, Map.class);
             if (!bodyMap.containsKey("query_string")) {
                 return argumentRequired(response, "Argument \"query_string\" is required");
             }
@@ -194,5 +200,4 @@ public class Controller {
         responseMap.put("error", msg);
         return responseMap;
     }
-
 }

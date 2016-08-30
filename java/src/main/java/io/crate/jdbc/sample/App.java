@@ -1,6 +1,5 @@
 package io.crate.jdbc.sample;
 
-
 import java.sql.SQLException;
 
 import static spark.Spark.port;
@@ -15,5 +14,4 @@ public class App {
         }
         new Controller(new DataProvider());
     }
-
 }

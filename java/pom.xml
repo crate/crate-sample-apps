@@ -5,18 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>crate.io</groupId>
-    <artifactId>crate-jdbc-app</artifactId>
+    <artifactId>crate-pgjdbc-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>Crate JDBC Driver sample app</name>
-    <url>https://crate.io/docs/getting-started/clients/#java</url>
+    <name>The Crate JDBC Sample Application</name>
+    <url>https://crate.io/docs/reference/en/latest/protocols/postgres.html</url>
 
     <properties>
         <spark.version>2.3</spark.version>
-        <crate.jdbc.version>1.9.3</crate.jdbc.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <apache.httpcomponents.version>4.3.4</apache.httpcomponents.version>
         <gson.version>2.5</gson.version>
+        <guava.version>19.0</guava.version>
+        <!-- get pgjdbc from master -->
+        <pgjdbc.version>master-SNAPSHOT</pgjdbc.version>
     </properties>
 
     <repositories>
@@ -30,21 +32,12 @@
             </snapshots>
         </repository>
         <repository>
-            <id>bintray-central</id>
-            <name>bintray</name>
-            <url>http://dl.bintray.com/crate/crate</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>io.crate</groupId>
-            <artifactId>crate-jdbc</artifactId>
-            <version>${crate.jdbc.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.sparkjava</groupId>
@@ -62,6 +55,18 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${apache.httpcomponents.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.pgjdbc</groupId>
+            <artifactId>pgjdbc</artifactId>
+            <version>${pgjdbc.version}</version>
         </dependency>
     </dependencies>
 
