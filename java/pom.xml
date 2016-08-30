@@ -5,18 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>crate.io</groupId>
-    <artifactId>crate-jdbc-app</artifactId>
+    <artifactId>crate-pgjdbc-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>Crate JDBC Driver sample app</name>
-    <url>https://crate.io/docs/getting-started/clients/#java</url>
+    <name>The Crate JDBC Sample Application</name>
+    <url>https://crate.io/docs/reference/en/latest/protocols/postgres.html</url>
 
     <properties>
-        <spark.version>2.3</spark.version>
-        <crate.jdbc.version>1.9.3</crate.jdbc.version>
+        <spark.version>2.5</spark.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <apache.httpcomponents.version>4.3.4</apache.httpcomponents.version>
         <gson.version>2.5</gson.version>
+        <pgjdbc.version>9.4.1210</pgjdbc.version>
     </properties>
 
     <repositories>
@@ -29,22 +29,9 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>bintray-central</id>
-            <name>bintray</name>
-            <url>http://dl.bintray.com/crate/crate</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>io.crate</groupId>
-            <artifactId>crate-jdbc</artifactId>
-            <version>${crate.jdbc.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.sparkjava</groupId>
@@ -62,6 +49,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${apache.httpcomponents.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${pgjdbc.version}</version>
         </dependency>
     </dependencies>
 
