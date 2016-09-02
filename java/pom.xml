@@ -64,8 +64,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.pgjdbc</groupId>
-            <artifactId>pgjdbc</artifactId>
+            <groupId>com.github.pgjdbc.pgjdbc</groupId>
+            <artifactId>postgresql</artifactId>
             <version>${pgjdbc.version}</version>
         </dependency>
     </dependencies>
