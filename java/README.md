@@ -3,8 +3,6 @@ This sample application uses [Spark][1] as web framework and the
 [PostgreSQL JDBC driver][2] to access the Crate database.
 
 ## Requirements
-- [Spark Framework][1]
-- [PostgreSQL JDBC][2]
 - [Java 8][3]
 
 ## Usage
