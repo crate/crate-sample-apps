@@ -25,8 +25,8 @@ Maven:
 <dependencies>
     ...
     <dependency>
-        <groupId>com.github.pgjdbc</groupId>
-        <artifactId>pgjdbc</artifactId>
+        <groupId>com.github.pgjdbc.pgjdbc</groupId>
+        <artifactId>postgresql</artifactId>
         <version>master-SNAPSHOT</version>
     </dependency>
 </dependencies>
