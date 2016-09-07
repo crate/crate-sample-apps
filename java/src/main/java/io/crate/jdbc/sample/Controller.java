@@ -32,8 +32,24 @@ class Controller {
         before(((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
             response.header("Access-Control-Request-Method", "*");
+            response.header("Access-Control-Allow-Methods", "*");
             response.header("Access-Control-Allow-Headers", "*");
         }));
+
+        options("/*", (request, response) -> {
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+
+            response.status(OK);
+            return response;
+        });
 
         get("/posts", (request, response) ->
                 model.getPosts(), gson::toJson);
@@ -179,6 +195,7 @@ class Controller {
             }
             return model.searchPosts((String) bodyMap.get("query_string"));
         }, gson::toJson);
+
         exception(SQLException.class, (e, request, response) -> {
             response.status(INTERNAL_ERROR);
             response.body(e.getLocalizedMessage());
