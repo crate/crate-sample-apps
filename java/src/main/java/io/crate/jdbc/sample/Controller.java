@@ -3,12 +3,13 @@ package io.crate.jdbc.sample;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 import spark.Response;
 import spark.utils.IOUtils;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,14 +154,16 @@ class Controller {
         get("/image/:digest", (request, response) -> {
             String digest = request.params(":digest");
             if (model.blobExists(digest)) {
-                CloseableHttpResponse closeableHttpResponse = model.getBlob(digest);
-                Arrays.stream(closeableHttpResponse.getAllHeaders()).forEach(header ->
-                                response.header(header.getName(), header.getValue())
-                );
+                HttpResponse httpResponse = model.getBlob(digest);
 
-                response.status(closeableHttpResponse.getStatusLine().getStatusCode());
+                response.status(httpResponse.getStatusLine().getStatusCode());
                 response.header("Content-Type", "image/gif");
-                response.body(IOUtils.toString(closeableHttpResponse.getEntity().getContent()));
+                response.header("Content-Length", httpResponse.getFirstHeader("Content-Length").getValue());
+
+                InputStream in = httpResponse.getEntity().getContent();
+                OutputStream out = response.raw().getOutputStream();
+                IOUtils.copy(in, out);
+
                 return response;
             } else {
                 return gson.toJson(
@@ -172,8 +175,8 @@ class Controller {
         delete("/image/:digest", (request, response) -> {
             String digest = request.params(":digest");
             if (model.blobExists(digest)) {
-                CloseableHttpResponse closeableHttpResponse = model.deleteBlob(digest);
-                response.status(closeableHttpResponse.getStatusLine().getStatusCode());
+                HttpResponse httpResponse = model.deleteBlob(digest);
+                response.status(httpResponse.getStatusLine().getStatusCode());
                 return response;
             } else {
                 return gson.toJson(

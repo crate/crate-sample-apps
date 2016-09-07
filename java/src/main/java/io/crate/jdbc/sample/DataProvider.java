@@ -1,7 +1,5 @@
 package io.crate.jdbc.sample;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -109,7 +107,7 @@ class DataProvider {
         if (results.next()) {
             return resultSetToMap.apply(results);
         } else {
-            return ImmutableMap.of();
+            return Collections.emptyMap();
         }
     }
 
@@ -134,10 +132,10 @@ class DataProvider {
         statement.setLong(5, System.currentTimeMillis());
         statement.setLong(6, 0);
         if (statement.executeUpdate() == 0) {
-            return ImmutableList.of();
+            return Collections.emptyList();
         }
         connection.createStatement().execute(String.format("REFRESH TABLE %s", POST_TABLE));
-        return ImmutableList.of(getPost(id));
+        return Collections.singletonList(getPost(id));
     }
 
     Map<String, Object> updatePost(String id, String val) throws SQLException {
@@ -148,7 +146,7 @@ class DataProvider {
         statement.setString(1, val);
         statement.setString(2, id);
         if (statement.executeUpdate() == 0) {
-            return ImmutableMap.of();
+            return Collections.emptyMap();
         }
         connection.createStatement().execute(String.format("REFRESH TABLE %s", POST_TABLE));
         return getPost(id);
@@ -161,7 +159,7 @@ class DataProvider {
                 "WHERE id = ?", POST_TABLE));
         statement.setString(1, id);
         if (statement.executeUpdate() == 0) {
-            return ImmutableMap.of();
+            return Collections.emptyMap();
         }
         connection.createStatement().execute(String.format("REFRESH TABLE %s", POST_TABLE));
         return getPost(id);
@@ -195,11 +193,11 @@ class DataProvider {
             put.setEntity(new ByteArrayEntity(body));
         }
         CloseableHttpResponse response = httpClient.execute(put);
-        return ImmutableMap.of(
-                "digest", digest,
-                "url", "/image/" + digest,
-                "status", String.valueOf(response.getStatusLine().getStatusCode())
-        );
+        return Collections.unmodifiableMap(new HashMap<String, String>() {{
+            put("digest", digest);
+            put("url", "/image/" + digest);
+            put("status", String.valueOf(response.getStatusLine().getStatusCode()));
+        }});
     }
 
     CloseableHttpResponse deleteBlob(String digest) throws IOException {
