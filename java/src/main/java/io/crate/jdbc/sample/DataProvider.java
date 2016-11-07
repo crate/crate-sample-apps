@@ -36,11 +36,10 @@ class DataProvider {
         httpPort = Integer.parseInt(getProperty("crate.http.port"));
         host = getProperty("crate.host");
         try {
-            Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(
-                    String.format(Locale.ENGLISH, "jdbc:postgresql://%s:%d/", host, psqlPort)
+                    String.format(Locale.ENGLISH, "jdbc:crate://%s:%d/", host, psqlPort)
             );
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             throw new SQLException("Cannot connect to the database", e);
         }
     }
@@ -86,12 +85,7 @@ class DataProvider {
 
         Map<String, Object> map = new HashMap<>(resultSetSize);
         for (int i = 1; i <= resultSetSize; i++) {
-            Object value = rs.getObject(i);
-            if (metaData.getColumnTypeName(i).equals("json")) {
-                map.put(metaData.getColumnName(i), gson.fromJson((String) value, Map.class));
-            } else {
-                map.put(metaData.getColumnName(i), value);
-            }
+            map.put(metaData.getColumnName(i), rs.getObject(i));
         }
         return map;
     };

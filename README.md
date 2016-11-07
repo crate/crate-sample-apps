@@ -27,7 +27,7 @@ and commented application code.
 ### Download and Install Crate
 For all backends you will need to install and run Crate first. This sample
 app requires Crate `0.54.1` or higher. The Java sample app requires Crate
-`0.56.0` or higher. Several ways exist to get an instance of Crate running,
+`0.57.0` or higher. Several ways exist to get an instance of Crate running,
 visit our [Getting Started][12] section to find the one that works best for you.
 
 ### Import Country Data

@@ -2,69 +2,27 @@
 **Note:** The application is written in Java 8.
 
 ## Installation
-Crate provides an experimental support for the
-[PostgreSQL wire protocol v3][1]. To get more detail information on the
-protocol support by Crate, please have a look at the [documentation][2].
+Staring from 0.57.0 Crate supports for the [PostgreSQL wire protocol v3][1].
+To get more detail information on the protocol support by Crate,
+please have a look at the [documentation][2].
 
-To obtain the [PostgresSQL JDBC driver][3], please follow [instructions][4]
-for the build tool of your choice. In the sample application, we use
-PostgreSQL JDBC driver, [Version 9.4.1210][5].
+In the sample application, we use the [Crate JDBC driver 2.0.x][3] which
+uses [PostgreSQL wire protocol v3][1]. To obtain the [Crate JDBC driver][4],
+please follow [instructions][5] for the build tool of your choice.
 
-Maven:
-
-```xml
-...
-<dependencies>
-    ...
-    <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>9.4.1210</version>
-    </dependency>
-</dependencies>
-...
-```
-
-or Gradle:
-
-```gradle
-...
-dependencies {
-    ...
-    compile compile 'com.github.pgjdbc:pgjdbc:9.4.1210'
-}
-...
-```
 
 ## Usage
-### Crate Settings
-The sample application requires Crate `0.56.0` or higher. To use the postgres
-wire protocol, we enable the protocol and explicitly set the port for the
-protocol:
-
-```yaml
-...
-psql.enabled: true
-psql.port: 5432
-...
-```
 
 ### Connecting to Crate
-The PostgresSQL JDBC driver class is `org.postgresql.Driver`. The
-following line of code loads the postgres driver:
+
+The application establishes the connection with Crate using the
+`DriverManager.getConnection()` method.
 
 ```java
-Class.forName("org.postgresql.Driver");
+Connection connection = DriverManager.getConnection("jdbc:crate//<host>:5432/");
 ```
 
-After the driver is loaded, the application establishes the connection
-with Crate using the `DriverManager.getConnection()` method.
-
-```java
-Connection connection = DriverManager.getConnection("jdbc:postgresql://<host>:5432/");
-```
-
-Please, take a look at the PostgresSQL JDBC driver docs to see the
+Please, take a look at the Crate JDBC driver documentation to see the
 [possible forms][6] of URLs supported by the driver.
 
 ### Executing statements
@@ -273,9 +231,9 @@ If a blob does not exist an HTTP status code 404 Not Found is returned.
 
 [1]: https://www.postgresql.org/docs/current/static/protocol.html
 [2]: https://crate.io/docs/reference/en/latest/protocols/postgres.html
-[3]: https://github.com/pgjdbc/pgjdbc
-[4]: https://github.com/pgjdbc/pgjdbc#supported-postgresql-versions
-[5]: https://jdbc.postgresql.org/download.html#others
-[6]: https://github.com/pgjdbc/pgjdbc#jdbc-url-syntax
+[3]: https://crate.io/docs/reference/jdbc/en/latest/
+[4]: https://crate.io/docs/clients/jdbc/
+[5]: https://bintray.com/crate/crate/crate-jdbc/view
+[6]: https://crate.io/docs/reference/jdbc/en/latest/#jdbc-url-format
 [7]: https://crate.io/docs/reference/blob.html
 [8]: https://hc.apache.org/httpcomponents-client-ga

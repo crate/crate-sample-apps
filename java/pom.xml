@@ -16,7 +16,8 @@
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <apache.httpcomponents.version>4.3.4</apache.httpcomponents.version>
         <gson.version>2.5</gson.version>
-        <pgjdbc.version>9.4.1210</pgjdbc.version>
+        <crate-jdbc.version>2.0.1</crate-jdbc.version>
+        <slf4j-simple.version>1.7.21</slf4j-simple.version>
     </properties>
 
     <repositories>
@@ -28,6 +29,14 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/crate/crate</url>
         </repository>
     </repositories>
 
@@ -52,9 +61,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${pgjdbc.version}</version>
+            <groupId>io.crate</groupId>
+            <artifactId>crate-jdbc</artifactId>
+            <version>${crate-jdbc.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j-simple.version}</version>
         </dependency>
     </dependencies>
 
