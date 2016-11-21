@@ -11,7 +11,8 @@ The simplest way to serve the frontend is by using the Python
 
 ```console
 $ cd frontend
-$ python -m SimpleHTTPServer
+$ python -m SimpleHTTPServer <- python 2.x
+$ python -m http.server <- python 3.x
 ```
 
 Then open the application on port `8000` in the browser:
