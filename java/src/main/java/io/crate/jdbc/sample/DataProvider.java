@@ -9,8 +9,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.postgresql.jdbc.PgResultSetMetaData;
-import org.postgresql.util.PGobject;
+import io.crate.shade.org.postgresql.jdbc.PgResultSetMetaData;
+import io.crate.shade.org.postgresql.util.PGobject;
 
 import java.io.IOException;
 import java.sql.*;
