@@ -6,7 +6,7 @@ var express = require('express');
 
 //configurables
 var crate_host = 'localhost';
-var crate_port = '4201';
+var crate_port = '4200';
 var service_port = 8080;
 
 //bootstrap
@@ -118,9 +118,9 @@ app.put('/post/:id/like', function(req, res){
 app.delete('/post/:id', function(req, res){
 
     var postID = req.params.id;
-    deletePost(postID).then((_) => {
+    deletePost(postID).then(() => {
             res.status(204).end();
-    }).catch((_) => {
+    }).catch(() => {
             res.status(404).end();
     });
 });
