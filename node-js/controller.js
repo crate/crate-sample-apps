@@ -160,7 +160,7 @@ app.post('/images', function(req, res){
 
     var encrypted = sha1(buf);
 
-    var urlValue = 'localhost:'+service_port+'/image/'+encrypted;
+    var urlValue = '/image/'+encrypted;
 
     var result = {};
     result['url'] = urlValue;
@@ -179,14 +179,27 @@ app.get('/images', function(req, res) {
     getImages().then((response) => {
         res.status(200).json(response.json);
     })
+    //.catch(() => {
+    //   res.status(404).end();
+    // })
 })
 
 app.get('/image/:digest', function(req, res) {
-    res.setHeader('Content-Type', 'image/gif');
-
-    getImage(req.params.digest).then((data) => {
-         res.end(data);
-    });
+    
+    getImage(req.params.digest).then((response) => {
+        if(response.json.length>0) {
+            res.setHeader('Content-Type', 'image/gif');
+            crate.getBlob('guestbook_images', req.params.digest).then((data) => {
+                res.status(200).end(data);
+            });
+        }
+        else {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(404).json({
+                error: 'Not found'
+            });
+        }
+    })
 });
 
 //### `DELETE /image/<digest>` Delete an image with given `digest`.
@@ -236,7 +249,36 @@ function getImages(){
 }
 
 function getImage(digest) {
-    return crate.getBlob('guestbook_images', digest);
+    return crate.execute("SELECT digest FROM Blob.guestbook_images WHERE digest='"+digest+"'");
+    // return new Promise((resolve) => {
+    //   const callback = function (response) {
+    //     const buffer = []
+
+    //     response.on('data', (chunk) => {
+    //       buffer.push(chunk)
+    //     })
+
+    //     response.on('end', () => {
+    //       return resolve(Buffer.concat(buffer))
+    //     })
+    //   }
+
+    //   const reqUrl = `${connectionPool.getBlobUrl()}${tableName}/${hashKey}`
+    //   console.log(reqUrl)
+    //   http.get(reqUrl, callback)
+    // })
+
+    // return new Promise((resolve, reject) => {
+    //   fs.readFile(filename, (err, data) => {
+    //     if (err) {
+    //       return reject(err)
+    //     }
+
+    //     _insertBlob(tableName, data)
+    //       .then((res) => resolve(res))
+    //       .catch((err) => reject(err))
+    //   })
+    // })
 }
 
 function deleteImage(digest) {
