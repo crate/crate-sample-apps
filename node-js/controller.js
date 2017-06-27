@@ -15,17 +15,16 @@ crate.connect(crate_host, crate_port);
 app.all('/*', function(req, res, next) {
    res.setHeader("Access-Control-Allow-Origin", "*");
    res.setHeader("Access-Control-Allow-Credentials", "true");    
-   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, UPDATE, DELETE");
+   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, UPDATE, DELETE, OPTION");
    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
    next();
 })
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(bodyParser.json({limit: '5mb'})); // for parsing application/json
+app.use(bodyParser.raw({limit: '5mb'}));
+app.use(bodyParser.urlencoded({limit: '5mb', extended: true })); // for parsing application/x-www-form-urlencoded
 
 //rest-service-functions
 //############POST-RESOURCE##########################
-
-
 
 //POST /posts - Create a new post. 
 app.post('/posts', function(req, res){
@@ -148,31 +147,29 @@ app.delete('/post/:id', function(req, res){
 app.post('/images', function(req, res){
     res.setHeader('Content-Type', 'application/json');
 
-    var body = [];
-    req.on('error', function(err) {
-        console.error(err);
-    }).on('data', function(chunk) {
-        body.push(chunk);
-    }).on('end', function() {
-        body = Buffer.concat(body).toString();
-        var jbody = JSON.parse(body);
-
-        var b64String = jbody.blob;
-        var buf = Buffer.from(b64String, 'base64');
-
-        var encrypted = sha1(buf);
-
-        var urlValue = 'localhost:'+service_port+'/image/'+encrypted;
-
-        var result = {};
-        result['url'] = urlValue;
-        result['digest'] = encrypted;
-
-        crate.insertBlob('guestbook_images', buf).then(() => {
-            res.status(201).json(result);
-        }).catch(() => {
-            res.status(409).json(result);
+    if(!req.body.blob){
+        res.status(400).json({
+            error: 'Argument "blob" is required',
+            status: 400
         });
+        return;
+    }
+
+    var b64String = req.body.blob;
+    var buf = Buffer.from(b64String, 'base64');
+
+    var encrypted = sha1(buf);
+
+    var urlValue = 'localhost:'+service_port+'/image/'+encrypted;
+
+    var result = {};
+    result['url'] = urlValue;
+    result['digest'] = encrypted;
+
+    crate.insertBlob('guestbook_images', buf).then(() => {
+        res.status(201).json(result);
+    }).catch(() => {
+        res.status(409).json(result);
     });
 });
 
