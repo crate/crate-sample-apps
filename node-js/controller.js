@@ -196,7 +196,8 @@ app.get('/image/:digest', function(req, res) {
         else {
             res.setHeader('Content-Type', 'application/json');
             res.status(404).json({
-                error: 'Not found'
+                error: 'Image with '+req.params.digest+' not found',
+                status: 404
             });
         }
     })
