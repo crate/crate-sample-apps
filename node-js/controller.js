@@ -1,8 +1,9 @@
 //requirements
-var uuidv4 = require('uuid/v4');
+var uuid = require('uuid/v1');
 var sha1 = require('sha1');
 var crate = require('node-crate');
-var express = require('express');
+var app = require('express')();
+var bodyParser = require('body-parser');
 
 //configurables
 var crate_host = 'localhost';
@@ -11,7 +12,6 @@ var service_port = 8080;
 
 //bootstrap
 crate.connect(crate_host, crate_port);
-var app = express();
 app.all('/*', function(req, res, next) {
    res.setHeader("Access-Control-Allow-Origin", "*");
    res.setHeader("Access-Control-Allow-Credentials", "true");    
@@ -19,39 +19,56 @@ app.all('/*', function(req, res, next) {
    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
    next();
 })
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 //rest-service-functions
 //############POST-RESOURCE##########################
 
+
+
 //POST /posts - Create a new post. 
 app.post('/posts', function(req, res){
     res.setHeader('Content-Type', 'application/json');
+    
+    //parsed data is found in req.body
 
-    var body = [];
-    req.on('error', function(err) {
-        console.error(err);
-    }).on('data', function(chunk) {
-        body.push(chunk);
-    }).on('end', function() {
-        body = Buffer.concat(body).toString();
-        var jbody = JSON.parse(body);
-
-        crate.insert(
-            'guestbook.posts', 
-            {
-                "id": uuidv4(),
-                "user": jbody.user,
-                "text": jbody.text,
-                "created": new Date().getTime(),
-                "image_ref": jbody.image_ref,
-                "like_count": 0
-            }).then(() => {
-                refreshTable().then((_) => {
-                    getPosts().then((response) => {
-                        res.status(201).json(response.json);
-                    })
-                })
-            });
+    //check for required data
+    if(!req.body.text) {
+        res.status(400).json({
+            error: 'Argument "text" is required',
+            status: 400
+        });
+        return;
+    }
+    if(!req.body.user.location) {
+        res.status(400).json({
+            error: 'Argument "location" is required',
+            status: 400
+        })
+        return;
+    }
+    
+    var tablename = 'guestbook.posts';
+    var id = uuid();
+    //insert
+    crate.insert(
+    tablename, 
+    {
+        "id": id,
+        "user": req.body.user,
+        "text": req.body.text,
+        "created": new Date().getTime(),
+        "image_ref": req.body.image_ref,
+        "like_count": 0
+    }).then(() => {
+        //refresh table to make sure new record is immediately available
+        refreshTable(tablename).then(() => {
+            //fetch new record
+            getPost(id).then((response) => {
+                res.status(201).json(response.json);
+            })
+        })
     });
 });
 
@@ -231,7 +248,7 @@ function deleteImage(digest) {
     return crate.delete('guestbook_images', where);
 }
 
-function refreshTable() {
-    return crate.execute("REFRESH TABLE guestbook.posts");
+function refreshTable(tablename) {
+    return crate.execute("REFRESH TABLE "+tablename);
 }
 

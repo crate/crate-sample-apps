@@ -1,0 +1,21 @@
+{
+  "name": "crate-sample-apps",
+  "version": "1.0.0",
+  "description": "node.js support for crate-sample-apps",
+  "main": "controller.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "crate",
+    "sample"
+  ],
+  "author": "Alex, Fabian",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.15.3",
+    "node-crate": "^2.0.1",
+    "sha1": "^1.1.1",
+    "uuid": "^3.1.0"
+  }
+}
