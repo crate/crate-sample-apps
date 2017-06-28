@@ -269,7 +269,7 @@ $app->post('/images', function() use ($app)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
-    if ($info['http_code'] != 201) {
+    if ($info['http_code'] != 201 && $info['http_code'] != 409) {
         $app->resource_error($info['http_code'], curl_error($ch));
     } else {
         $app->success($info['http_code'], array(
