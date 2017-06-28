@@ -234,7 +234,8 @@ $app->get('/posts', function() use ($app)
 {
     $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)");
+            WHERE within(p.user['location'], c.geometry)
+            ORDER BY p.created DESC");
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
     $app->success(200, $result);
