@@ -3,11 +3,13 @@ var uuid = require('uuid/v1');
 var sha1 = require('sha1');
 var crate = require('node-crate');
 var app = require('express')();
+var http = require('http');
 var bodyParser = require('body-parser');
 
 //configurables
 var crate_host = 'localhost';
-var crate_port = '4200';
+var crate_port_number = 4200;
+var crate_port = ''+crate_port_number;
 var service_port = 8080;
 
 //bootstrap
@@ -80,7 +82,7 @@ app.get('/posts', function(req, res) {
     });
 });
 
-//GET /post/:id - Retrieves the post with the corresponding id. 
+//GET /post/:id - Retrieves the post with the corresponding id.
 app.get('/post/:id', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
     
@@ -112,7 +114,7 @@ app.put('/post/:id', function(req, res) {
         })
         return;
     }
-     
+
     updatePost(id, text).then((_) => {
         refreshTable().then((_) => {
                 getPost(id).then((response) => {
@@ -123,8 +125,6 @@ app.put('/post/:id', function(req, res) {
         res.status(404).end();
     })
 });
-
-
 
 //### `PUT /post/<id>/like` Increments the like count for a given post by one.
 app.put('/post/:id/like', function(req, res){
@@ -180,7 +180,7 @@ app.post('/search', function(req, res){
     }
 
     var query = ("SELECT p.*, p._score AS _score, c.name AS country, c.geometry AS area FROM guestbook.posts AS p, guestbook.countries AS c WHERE within(p.user['location'], c.geometry) AND match(text, ?) ORDER BY _score DESC");
-    
+
     crate.execute(query, [searchText]).then((response) => {
         res.status(200).json(response.json);
     })
@@ -223,24 +223,21 @@ app.get('/images', function(req, res) {
     getImages().then((response) => {
         res.status(200).json(response.json);
     })
-    //.catch(() => {
-    //   res.status(404).end();
-    // })
 })
 
 app.get('/image/:digest', function(req, res) {
-
-    getImage(req.params.digest).then((response) => {
-        if(response.json.length>0) {
+    console.log('GET /images was called with digest: '+req.params.digest);
+    crate.getBlob('guestbook_images', req.params.digest).then((data) => {
+        console.log(req.params.digest + ' has a length of ' + data.length);
+        if(data.length>0) {
             res.setHeader('Content-Type', 'image/gif');
-            crate.getBlob('guestbook_images', req.params.digest).then((data) => {
-                res.status(200).end(data);
-            });
+            res.setHeader('Content-Length', ''+data.length+'');
+            res.status(200).end(data);
         }
         else {
             res.setHeader('Content-Type', 'application/json');
             res.status(404).json({
-                error: 'Image with id="'+req.params.digest+'" not found',
+                error: 'Image with digest="'+req.params.digest+'" not found',
                 status: 404
             });
         }
@@ -249,13 +246,27 @@ app.get('/image/:digest', function(req, res) {
 
 //### `DELETE /image/<digest>` Delete an image with given `digest`.
 app.delete('/image/:digest', function(req, res){
-
     var digest = req.params.digest;
-    deletePost(digest).then(() => {
-            res.status(204).end();
-    }).catch(() => {
-            res.status(404).end();
-    });
+
+    var options = {
+        host: crate_host,
+        port: crate_port_number,
+        path: '/_blobs/guestbook_images/'+digest,
+        method: 'DELETE'
+    };
+    http.request(options, (response) => {
+        res.status(response.statusCode);
+        if(response.statusCode!=204) {
+            res.setHeader('Content-Type', 'application/json');            
+            res.json({
+                error: 'Image with digest="'+digest+'" not found',
+                status: 404
+            });
+        }
+        else {
+            res.end();
+        }
+    }).end();
 });
 
 //launch
@@ -295,16 +306,15 @@ function getImages(){
 }
 
 function getImage(digest) {
-    return crate.execute("SELECT digest FROM Blob.guestbook_images WHERE digest='"+digest+"'");
+    var query = "SELECT digest FROM Blob.guestbook_images WHERE digest='?'";
+    return crate.execute(query, [digest]);
 }
 
 function deleteImage(digest) {
-    var where = "id='"+digest+"'";
-    console.log('deleting image with id:'+digest);
-    return crate.delete('guestbook_images', where);
+    var query = "DELETE FROM Blob.guestbook_images WHERE digest='?'";
+    return crate.execute(query, [digest]);
 }
 
 function refreshTable() {
     return crate.execute("REFRESH TABLE guestbook.posts");
 }
-
