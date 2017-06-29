@@ -25,6 +25,7 @@ import sys
 import json
 import base64
 import unittest
+import time
 from argparse import ArgumentParser
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
@@ -286,7 +287,11 @@ class ImagesTestCase(CrateTestCase):
         return d['digest'], d['url']
 
     def _retrieve_image(self, digest):
-        with urlopen(self.get_url('/image/{}'.format(digest))) as response:
+        timeout=100
+        interval=.2
+        path=self.get_url('/image/{}'.format(digest))
+        expectedStatusCode=200
+        with self._wait_for_image_response(timeout, interval, path, expectedStatusCode) as response:
             self.assertEqual(response.status, 200)
             h = response.headers
             self.assertEqual(h['Content-Type'], 'image/gif')
@@ -295,10 +300,21 @@ class ImagesTestCase(CrateTestCase):
                 self.assertEqual(len(image_content), 1702902)
             else:
                 self.assertEqual(h['Content-Length'], '1702902')
+            
 
         invalid_digest = '0' * 40
         res, code = self.req('GET', '/image/{}'.format(invalid_digest))
         self.assertImageNotFound(res, code, digest=invalid_digest)
+
+    def _wait_for_image_response(self, timeout, interval, path, expectedStatusCode):
+        timeLeft = timeout
+        while timeLeft > 0:
+            try:
+                return urlopen(path)
+            except:
+                time.sleep(interval)
+                timeLeft -= interval
+        self.assertTrue("Timeout waiting for image exceeded", False)
 
     def _delete_image(self, digest):
         res, code = self.req('DELETE', '/image/{}'.format(digest))
