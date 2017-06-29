@@ -80,67 +80,111 @@ app.get('/posts', function(req, res) {
     });
 });
 
-//GET /post/{id} - Retrieves the post with the corresponding id. 
+//GET /post/:id - Retrieves the post with the corresponding id. 
 app.get('/post/:id', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
     
-    getPost(req.params.id).then((response) => {
-        res.status(200).json(response.json);
-    })
+    var id = req.params.id;
+
+    getPost(id).then((response) => {
+        if(response.rowcount > 0){
+            res.status(200).json(response.json[0]);
+        }else {
+            res.status(404).json({
+                error: 'Post with id="'+id+'" not found',
+                status: 404
+            });
+        }
+    });
 });
 
 //PUT /post/{id} - Updates text property of given id. 
 app.put('/post/:id', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
 
-    var body = [];
-    req.on('error', function(err) {
-        console.error(err);
-    }).on('data', function(chunk) {
-        body.push(chunk);
-    }).on('end', function() {
-        body = Buffer.concat(body).toString();
-        var jbody = JSON.parse(body);
-        
-        updatePost(req.params.id, jbody.text).then(() => {
-            refreshTable().then((_) => {
-                getPost(req.params.id).then((response) => {
-                    res.status(200).json(response.json);
-                })
-            })
-        }).catch(() => {
-            res.status(404).end();
+    var id = req.params.id;
+    var text = req.body.text;
+
+    if(!text) {
+        res.status(400).json({
+            error: 'Argument "text" is required',
+            status: 400
         })
-    });
+        return;
+    }
+     
+    updatePost(id, text).then((_) => {
+        refreshTable().then((_) => {
+                getPost(id).then((response) => {
+                    res.status(200).json(response.json[0]);
+                })
+        })
+    }).catch(() => {
+        res.status(404).end();
+    })
 });
+
+
 
 //### `PUT /post/<id>/like` Increments the like count for a given post by one.
 app.put('/post/:id/like', function(req, res){
     res.setHeader('Content-Type', 'application/json');
 
-    var postID = req.params.id;
-    getPost(postID).then((response) => {
+    var id = req.params.id
+    getPost(id).then((response) => {
         var newLikes = response.json[0].like_count + 1;
-        likePost(postID, newLikes).then(() => {
+        likePost(id, newLikes).then(() => {
             response.json[0].like_count += 1;
-            res.status(200).json(response.json);
+            refreshTable().then(()=>{
+                res.status(200).json(response.json[0]);
             })
+        })
     }).catch(() => {
-        res.status(404).end();
-    });
+        res.status(404).json({
+            error: 'Post with id="'+id+'" not found',
+            status: 404
+        })
+    })
 });
 
 //### `DELETE /post/<id>`   Delete a post with given `id`.
 app.delete('/post/:id', function(req, res){
 
-    var postID = req.params.id;
-    deletePost(postID).then(() => {
-            res.status(204).end();
-    }).catch(() => {
-            res.status(404).end();
-    });
+    var id = req.params.id;
+
+    deletePost(id).then((response) => {
+        if(response.rowcount>0) {
+            res.status(204).json(response.json);
+        }
+        else {
+            res.status(404).json({
+                error: 'Post with id="'+id+'" not found',
+                status: 404
+            });
+        }
+    })
 });
 
+//### `POST /search` Issue a search request to fetch a list of posts whose ``text`` matches a given query string.
+app.post('/search', function(req, res){
+    res.setHeader('Content-Type', 'application/json');
+
+    var searchText = req.body.query_string;
+
+    if(!searchText) {
+        res.status(400).json({
+            error: 'Argument "query_string" is required',
+            status: 400
+        })
+        return;
+    }
+
+    var query = ("SELECT p.*, p._score AS _score, c.name AS country, c.geometry AS area FROM guestbook.posts AS p, guestbook.countries AS c WHERE within(p.user['location'], c.geometry) AND match(text, ?) ORDER BY _score DESC");
+    
+    crate.execute(query, [searchText]).then((response) => {
+        res.status(200).json(response.json);
+    })
+});
 
 //############IMAGE-RESOURCE##########################
 
@@ -185,7 +229,7 @@ app.get('/images', function(req, res) {
 })
 
 app.get('/image/:digest', function(req, res) {
-    
+
     getImage(req.params.digest).then((response) => {
         if(response.json.length>0) {
             res.setHeader('Content-Type', 'image/gif');
@@ -196,7 +240,7 @@ app.get('/image/:digest', function(req, res) {
         else {
             res.setHeader('Content-Type', 'application/json');
             res.status(404).json({
-                error: 'Image with '+req.params.digest+' not found',
+                error: 'Image with id="'+req.params.digest+'" not found',
                 status: 404
             });
         }
@@ -227,7 +271,8 @@ function getPosts() {
 }
 
 function getPost(id) {
-    return crate.execute("SELECT p.*, c.name as country, c.geometry as area FROM guestbook.posts AS p, guestbook.countries AS c WHERE within(p.user['location'], c.geometry) AND p.id='"+id+"'");
+    var query = ("SELECT p.*, c.name as country, c.geometry as area FROM guestbook.posts AS p, guestbook.countries AS c WHERE within(p.user['location'], c.geometry) AND p.id=?");
+    return crate.execute(query, [id]);
 }
 
 function updatePost(id, newText) {
@@ -241,8 +286,8 @@ function likePost(id, newLikes) {
 }
 
 function deletePost(id) {
-    var where = "id='"+id+"'";
-    return crate.delete('guestbook.posts', where);
+    var query = ("DELETE FROM guestbook.posts WHERE id=?");
+    return crate.execute(query, [id]);
 }
 
 function getImages(){
@@ -251,35 +296,6 @@ function getImages(){
 
 function getImage(digest) {
     return crate.execute("SELECT digest FROM Blob.guestbook_images WHERE digest='"+digest+"'");
-    // return new Promise((resolve) => {
-    //   const callback = function (response) {
-    //     const buffer = []
-
-    //     response.on('data', (chunk) => {
-    //       buffer.push(chunk)
-    //     })
-
-    //     response.on('end', () => {
-    //       return resolve(Buffer.concat(buffer))
-    //     })
-    //   }
-
-    //   const reqUrl = `${connectionPool.getBlobUrl()}${tableName}/${hashKey}`
-    //   console.log(reqUrl)
-    //   http.get(reqUrl, callback)
-    // })
-
-    // return new Promise((resolve, reject) => {
-    //   fs.readFile(filename, (err, data) => {
-    //     if (err) {
-    //       return reject(err)
-    //     }
-
-    //     _insertBlob(tableName, data)
-    //       .then((res) => resolve(res))
-    //       .catch((err) => reject(err))
-    //   })
-    // })
 }
 
 function deleteImage(digest) {
@@ -288,7 +304,7 @@ function deleteImage(digest) {
     return crate.delete('guestbook_images', where);
 }
 
-function refreshTable(tablename) {
-    return crate.execute("REFRESH TABLE "+tablename);
+function refreshTable() {
+    return crate.execute("REFRESH TABLE guestbook.posts");
 }
 
