@@ -287,7 +287,7 @@ class ImagesTestCase(CrateTestCase):
         return d['digest'], d['url']
 
     def _retrieve_image(self, digest):
-        timeout=100
+        timeout=5
         interval=.2
         path=self.get_url('/image/{}'.format(digest))
         expectedStatusCode=200
@@ -300,21 +300,20 @@ class ImagesTestCase(CrateTestCase):
                 self.assertEqual(len(image_content), 1702902)
             else:
                 self.assertEqual(h['Content-Length'], '1702902')
-            
 
         invalid_digest = '0' * 40
         res, code = self.req('GET', '/image/{}'.format(invalid_digest))
         self.assertImageNotFound(res, code, digest=invalid_digest)
 
     def _wait_for_image_response(self, timeout, interval, path, expectedStatusCode):
-        timeLeft = timeout
+        timeLeft=timeout
         while timeLeft > 0:
             try:
                 return urlopen(path)
             except:
                 time.sleep(interval)
-                timeLeft -= interval
-        self.assertTrue("Timeout waiting for image exceeded", False)
+                timeLeft-=interval
+        self.assertTrue("Time waiting exceeded",False)
 
     def _delete_image(self, digest):
         res, code = self.req('DELETE', '/image/{}'.format(digest))

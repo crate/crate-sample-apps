@@ -54,23 +54,23 @@ app.post('/posts', function(req, res){
     var id = uuid();
     //insert
     crate.insert(
-    tablename, 
-    {
-        "id": id,
-        "user": req.body.user,
-        "text": req.body.text,
-        "created": new Date().getTime(),
-        "image_ref": req.body.image_ref,
-        "like_count": 0
-    }).then(() => {
-        //refresh table to make sure new record is immediately available
-        refreshTable(tablename).then(() => {
-            //fetch new record
-            getPost(id).then((response) => {
-                res.status(201).json(response.json);
+        tablename,
+        {
+            "id": id,
+            "user": req.body.user,
+            "text": req.body.text,
+            "created": new Date().getTime(),
+            "image_ref": req.body.image_ref,
+            "like_count": 0
+        }).then(() => {
+            //refresh table to make sure new record is immediately available
+            refreshTable().then(() => {
+                //fetch new record
+                getPost(id).then((response) => {
+                    res.status(201).json(response.json);
+                })
             })
-        })
-    });
+        });
 });
 
 //GET /posts - Retrieve a list of all posts. 
@@ -125,6 +125,8 @@ app.put('/post/:id', function(req, res) {
         res.status(404).end();
     })
 });
+
+
 
 //### `PUT /post/<id>/like` Increments the like count for a given post by one.
 app.put('/post/:id/like', function(req, res){
@@ -187,7 +189,6 @@ app.post('/search', function(req, res){
 });
 
 //############IMAGE-RESOURCE##########################
-
 app.post('/images', function(req, res){
     res.setHeader('Content-Type', 'application/json');
 
@@ -257,7 +258,7 @@ app.delete('/image/:digest', function(req, res){
     http.request(options, (response) => {
         res.status(response.statusCode);
         if(response.statusCode!=204) {
-            res.setHeader('Content-Type', 'application/json');            
+            res.setHeader('Content-Type', 'application/json');
             res.json({
                 error: 'Image with digest="'+digest+'" not found',
                 status: 404
@@ -310,11 +311,7 @@ function getImage(digest) {
     return crate.execute(query, [digest]);
 }
 
-function deleteImage(digest) {
-    var query = "DELETE FROM Blob.guestbook_images WHERE digest='?'";
-    return crate.execute(query, [digest]);
-}
-
 function refreshTable() {
     return crate.execute("REFRESH TABLE guestbook.posts");
 }
+
