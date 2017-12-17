@@ -2,7 +2,7 @@
 DROP TABLE IF EXISTS guestbook.posts;
 CREATE TABLE guestbook.posts (
     id STRING PRIMARY KEY,
-    user OBJECT(STRICT) AS (
+    "user" OBJECT(STRICT) AS (
         name STRING,
         location GEO_POINT
     ),
