@@ -19,7 +19,7 @@ The application establishes the connection with Crate using the
 `DriverManager.getConnection()` method.
 
 ```java
-Connection connection = DriverManager.getConnection("jdbc:crate//<host>:5432/");
+Connection connection = DriverManager.getConnection("jdbc:crate://<host>:5432/");
 ```
 
 Please, take a look at the Crate JDBC driver documentation to see the
