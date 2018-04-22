@@ -5,3 +5,4 @@ php/composer.lock
 java/target/*
 java/java.iml
 java/.idea
+node-js/node_modules
