@@ -39,10 +39,10 @@ from flask import (
     make_response,
     jsonify
 )
+
 from flask.ext.restful import Api, Resource
 from flask.ext.restful.reqparse import RequestParser
 from flask.ext.cors import CORS
-
 
 # app configuration
 CRATE_HOST = 'localhost:4200'
@@ -108,7 +108,7 @@ class Post(PostResource):
         self.cursor.execute("""
             SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)
+            WHERE within(p."user"['location'], c.geometry)
               AND p.id = ?
         """, (id,))
         # convert response from Crate into
@@ -158,7 +158,7 @@ class PostList(PostResource):
         self.cursor.execute("""
             SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)
+            WHERE within(p."user"['location'], c.geometry)
             ORDER BY p.created DESC
         """)
         # convert response from Crate into
@@ -190,12 +190,11 @@ class PostList(PostResource):
             image_ref = data.image_ref,
             like_count = 0,
         )
-        k = list(values.keys())
         v = list(values.values())
         # compile and execute INSERT statement
         self.cursor.execute("""INSERT INTO {} ({}) VALUES ({})""".format(
             self.__table__,
-            ', '.join(k),
+            'id, created, "user", text, image_ref, like_count',
             ', '.join('?' * len(v))
         ), v)
         # refresh table to make sure new record is immediately available
@@ -204,7 +203,7 @@ class PostList(PostResource):
         self.cursor.execute("""
             SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)
+            WHERE within(p."user"['location'], c.geometry)
               AND p.id = ?
         """, (post_id,))
         # convert response from Crate into
@@ -230,7 +229,7 @@ class Like(PostResource):
             self.cursor.execute("""
                 SELECT p.*, c.name as country, c.geometry as area
                 FROM guestbook.posts AS p, guestbook.countries AS c
-                WHERE within(p.user['location'], c.geometry)
+                WHERE within(p."user"['location'], c.geometry)
                   AND p.id = ?
             """, (id,))
             # convert response from Crate into
@@ -260,7 +259,7 @@ class Search(PostResource):
             SELECT p.*, p._score AS _score,
               c.name AS country, c.geometry AS area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)
+            WHERE within(p."user"['location'], c.geometry)
               AND match(text, ?)
             ORDER BY _score DESC
         """, (data.query_string,))

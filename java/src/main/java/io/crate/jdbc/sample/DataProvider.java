@@ -35,9 +35,12 @@ class DataProvider {
         int psqlPort = Integer.parseInt(getProperty("crate.psql.port"));
         httpPort = Integer.parseInt(getProperty("crate.http.port"));
         host = getProperty("crate.host");
+        Properties props = new Properties();
+        props.put("user", getProperty("crate.user"));
+        props.put("password", getProperty("crate.password"));
         try {
             connection = DriverManager.getConnection(
-                    String.format(Locale.ENGLISH, "jdbc:crate://%s:%d/", host, psqlPort)
+                String.format(Locale.ENGLISH, "jdbc:crate://%s:%d/", host, psqlPort), props
             );
         } catch (SQLException e) {
             throw new SQLException("Cannot connect to the database", e);
@@ -65,7 +68,7 @@ class DataProvider {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "SELECT p.*, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
-                "WHERE within(p.user['location'], c.geometry)" +
+                "WHERE within(p.\"user\"['location'], c.geometry)" +
                 "ORDER BY p.created DESC", POST_TABLE, COUNTRIES_TABLE));
         ResultSet rs = statement.executeQuery();
         return resultSetToListOfMaps(rs);
@@ -94,7 +97,7 @@ class DataProvider {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "SELECT p.*, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
-                "WHERE within(p.user['location'], c.geometry) " +
+                "WHERE within(p.\"user\"['location'], c.geometry) " +
                 "AND p.id = ?", POST_TABLE, COUNTRIES_TABLE));
         statement.setString(1, id);
         ResultSet results = statement.executeQuery();
@@ -108,7 +111,7 @@ class DataProvider {
     List<Map<String, Object>> insertPost(Map<String, Object> post) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "INSERT INTO %s " +
-                "(id, user, text, image_ref, created, like_count) " +
+                "(id, \"user\", text, image_ref, created, like_count) " +
                 "VALUES (?, ?, ?, ?, ?, ?)", POST_TABLE));
 
         String id = UUID.randomUUID().toString();
@@ -218,7 +221,7 @@ class DataProvider {
         PreparedStatement statement = connection.prepareStatement(String.format(
                 "SELECT p.*, p._score as _score, c.name as country, c.geometry as area " +
                 "FROM %s AS p, %s AS c " +
-                "WHERE within(p.user['location'], c.geometry)" +
+                "WHERE within(p.\"user\"['location'], c.geometry)" +
                 "AND match(text, ?) " +
                 "ORDER BY _score DESC", POST_TABLE, COUNTRIES_TABLE));
         statement.setString(1, query);

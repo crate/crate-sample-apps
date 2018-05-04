@@ -7,7 +7,7 @@ An Erlang OTP backend app using Cowboy_ and craterl_.
 Prerequisites
 =============
 
-You will need `Erlang 18`_.
+You will need `Erlang 20`_.
 
 Rebar3_ is bundled with the app as ``rebar3``.
 
