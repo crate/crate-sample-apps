@@ -26,6 +26,7 @@ class DataProvider {
 
     private static Properties properties;
     private final String host;
+    private final String user;
     private final int httpPort;
 
     private CloseableHttpClient httpClient = HttpClients.createSystem();
@@ -35,9 +36,14 @@ class DataProvider {
         int psqlPort = Integer.parseInt(getProperty("crate.psql.port"));
         httpPort = Integer.parseInt(getProperty("crate.http.port"));
         host = getProperty("crate.host");
+        user = getProperty("crate.user");
+
+        Properties properties = new Properties();
+        properties.put("user", user);
+        
         try {
             connection = DriverManager.getConnection(
-                    String.format(Locale.ENGLISH, "jdbc:crate://%s:%d/", host, psqlPort)
+                    String.format(Locale.ENGLISH, "jdbc:crate://%s:%d/", host, psqlPort), properties
             );
         } catch (SQLException e) {
             throw new SQLException("Cannot connect to the database", e);
