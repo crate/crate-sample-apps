@@ -70,7 +70,7 @@ $app->get('/post/:id', function($id) use ($app)
 {
     $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry) AND p.id = ?");
+            WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
     $qry->bindParam(1, $id);
     $qry->execute();
     $result = $qry->fetch(PDO::FETCH_ASSOC);
@@ -105,7 +105,7 @@ $app->post('/posts', function() use ($app)
     $now       = time() * 1000;
     $likeCount = 0;
     $qry       = $app->conn->prepare("INSERT INTO guestbook.posts (
-      id, user, text, created, image_ref, like_count
+      id, \"user\", text, created, image_ref, like_count
     ) VALUES (
       ?, ?, ?, ?, ?, ?
     )");
@@ -122,7 +122,7 @@ $app->post('/posts', function() use ($app)
         $app->refreshTable('guestbook.posts');
         $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry) AND p.id = ?");
+            WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
         $qry->bindParam(1, $id);
         $qry->execute();
         $result = $qry->fetchAll(PDO::FETCH_ASSOC);
@@ -153,7 +153,7 @@ $app->put('/post/:id', function($id) use ($app)
         $app->refreshTable("guestbook.posts");
         $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry) AND p.id = ?");
+            WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
         $qry->bindParam(1, $id);
         $result = $qry->fetch(PDO::FETCH_ASSOC);
         $app->success(200, $result);
@@ -215,7 +215,7 @@ $app->put('/post/:id/like', function($id) use ($app)
             $app->refreshTable("guestbook.posts");
             $qryS = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
                 FROM guestbook.posts AS p, guestbook.countries AS c
-                WHERE within(p.user['location'], c.geometry) AND p.id = ?");
+                WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
             $qryS->bindParam(1, $id);
             $result = $qryS->fetch(PDO::FETCH_ASSOC);
             $app->success(200, $result);
@@ -234,7 +234,7 @@ $app->get('/posts', function() use ($app)
 {
     $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)
+            WHERE within(p.\"user\"['location'], c.geometry)
             ORDER BY p.created DESC");
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
@@ -336,7 +336,7 @@ $app->post('/search', function() use ($app)
     $qry = $app->conn->prepare("SELECT p.*, p._score as _score,
               c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
-            WHERE within(p.user['location'], c.geometry)
+            WHERE within(p.\"user\"['location'], c.geometry)
               AND match(p.text, ?)");
     $qry->bindParam(1, $data->query_string);
     $qry->execute();

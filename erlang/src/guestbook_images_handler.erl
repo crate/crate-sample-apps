@@ -14,20 +14,22 @@
 ]).
 
 -include("guestbook.hrl").
+-include("guestbook_cors.hrl").
 
 init({_Transport, _Type}, _Req, _Opts) ->
   {upgrade, protocol, cowboy_rest}.
 
 rest_init(Req, Opts) ->
   {craterl, ClientRef} = lists:keyfind(craterl, 1, Opts),
-  {ok, Req, #{craterl => ClientRef}}.
+  Req2 = addCORSHeaders(Req),
+  {ok, Req2, #{craterl => ClientRef}}.
 
 allowed_methods(Req, State) ->
-  {[<<"GET">>, <<"POST">>], Req, State}.
+  {[<<"GET">>, <<"POST">>, <<"OPTIONS">>], Req, State}.
 
 content_types_accepted(Req, State) -> {
   [
-    {?JSON_CONTENT_TYPE, image_from_json}
+    {'*', image_from_json}
   ],
   Req, State
 }.
@@ -70,6 +72,9 @@ resource_exists(Req, State) ->
   {Method, Req2} = cowboy_req:method(Req),
   resource_exists(Method, Req2, State).
 resource_exists(<<"GET">>, Req, State) ->
+  %% collection of images always exists
+  {true, Req, State};
+resource_exists(<<"OPTIONS">>, Req, State) ->
   %% collection of images always exists
   {true, Req, State};
 resource_exists(<<"POST">>, Req, #{craterl := CraterlClientRef, blob := Base64Blob}=State) ->

@@ -5,3 +5,6 @@ php/composer.lock
 java/target/*
 java/java.iml
 java/.idea
+java/crate-pgjdbc-app.iml
+nodejs/package-lock.json
+nodejs/node_modules

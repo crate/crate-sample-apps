@@ -20,7 +20,12 @@
 %%% software solely pursuant to the terms of the relevant commercial agreement.
 %%%-------------------------------------------------------------------
 
--define(JSON_CT_HEADER, {<<"content-type">>, <<"application/json">>}).
--define(GIF_CT_HEADER, {<<"content-type">>, <<"image/gif">>}).
--define(JSON_CONTENT_TYPE, { <<"application">>, <<"json">>, []}).
--define(IMAGES_BLOB_TABLE, <<"guestbook_images">>).
+-export([
+  addCORSHeaders/1
+]).
+
+addCORSHeaders(Req) ->
+  Req2 = cowboy_req:set_resp_header(<<"access-control-allow-methods">>, <<"GET, POST, PUT, DELETE, OPTIONS">>, Req),
+  Req3 = cowboy_req:set_resp_header(<<"access-control-allow-origin">>, <<"*">>, Req2),
+  Req4 = cowboy_req:set_resp_header(<<"access-control-allow-headers">>, <<"Origin, X-Requested-With, Content-Type, Accept">>, Req3),
+  Req4.

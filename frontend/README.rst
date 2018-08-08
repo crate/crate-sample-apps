@@ -9,12 +9,14 @@ The single file, app.js_, contains all the application logic.
 Serving The Application
 =======================
 
+(Please make sure that python3 is installed)
+
 The simplest way to serve the frontend is like so:
 
 .. code-block:: sh
 
     $ cd frontend
-    $ python -m SimpleHTTPServer
+    $ python -m http.server
 
 Then, open the application in your browser:
 
@@ -22,4 +24,4 @@ Then, open the application in your browser:
 
 .. _AngularJS: https://angularjs.org/
 .. _app.js: app.js
-.. _SimpleHTTPServer: https://docs.python.org/2/library/simplehttpserver.html
+.. _http.server: https://docs.python.org/3/library/http.server.html

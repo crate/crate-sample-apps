@@ -35,18 +35,27 @@
   like_post/2
 ]).
 -include("guestbook.hrl").
+-include("guestbook_cors.hrl").
 
 init({tcp, http}, _Req, _Opts) ->
   {upgrade, protocol, cowboy_rest}.
 
 rest_init(Req, Opts) ->
   {craterl, ClientRef} = lists:keyfind(craterl, 1, Opts),
-  {ok, Req, #{craterl => ClientRef}}.
+  Req2 = addCORSHeaders(Req),
+  {ok, Req2, #{craterl => ClientRef}}.
 
 allowed_methods(Req, State) ->
-  {[<<"PUT">>], Req, State}.
+  {[<<"PUT">>, <<"OPTIONS">>], Req, State}.
 
 resource_exists(Req, #{craterl := CrateClientRef}=State) ->
+  {Method, Req3} = cowboy_req:method(Req),
+  resource_exists(Method, Req3, State, CrateClientRef).
+resource_exists(<<"OPTIONS">>, Req, State, CrateClientRef) ->
+  %% collection of posts always exists
+  CrateClientRef,
+  {true, Req, State};
+resource_exists(<<"PUT">>, Req, State, CrateClientRef) ->
   {Id, Req2} = cowboy_req:binding(id, Req),
   %% do the actual update to the model here, so we save 1 GET
   case guestbook_post_model:like_post(CrateClientRef, Id) of

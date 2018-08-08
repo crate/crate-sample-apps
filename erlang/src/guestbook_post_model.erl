@@ -47,7 +47,7 @@
 %%% SQL STATEMENTS
 -define(SCHEMA, <<"CREATE TABLE IF NOT EXISTS guestbook.posts (
     id STRING PRIMARY KEY,
-    user OBJECT(STRICT) AS (
+    \"user\" OBJECT(STRICT) AS (
       name STRING,
       location GEO_POINT
     ),
@@ -57,7 +57,7 @@
     like_count LONG
   ) WITH (number_of_replicas = '0-2')">>).
 -define(COMMON_SELECT, <<"SELECT posts.id as id,
-                              posts.user as user,
+                              posts.\"user\" as \"user\",
                               posts.text as text,
                               posts.created as created,
                               posts.image_ref as image_ref,
@@ -65,13 +65,13 @@
                               countries.geometry as area,
                               countries.name as country
                             FROM guestbook.posts as posts INNER JOIN guestbook.countries as countries
-                            ON within(posts.user['location'], countries.geometry)">>).  %% TODO: we need outer joins
+                            ON within(posts.\"user\"['location'], countries.geometry)">>).  %% TODO: we need outer joins
 -define(GET_SINGLE_STMT, <<?COMMON_SELECT/binary, " WHERE posts.id = ? LIMIT 1">>).
 -define(GET_STMT, <<?COMMON_SELECT/binary, " ORDER BY posts.created DESC">>).
 -define(SEARCH_STMT, <<?COMMON_SELECT/binary, " WHERE match(text, ?)
                                                 ORDER BY posts._score DESC, posts.created DESC">>).
 -define(DELETE_STMT, <<"DELETE FROM guestbook.posts WHERE id = ?">>).
--define(INSERT_STMT, <<"INSERT INTO guestbook.posts (id, image_ref, text, user, created, like_count)
+-define(INSERT_STMT, <<"INSERT INTO guestbook.posts (id, image_ref, text, \"user\", created, like_count)
                                              VALUES (?,  ?,         ?,    ?,    CURRENT_TIMESTAMP, 0)">>).
 -define(REFRESH_STMT, <<"REFRESH TABLE guestbook.posts">>).
 -define(UPDATE_STMT, <<"UPDATE guestbook.posts SET text=? WHERE id=?">>).
@@ -117,7 +117,7 @@ search_posts(CraterlClientRef, SearchTerm) ->
 -spec create_post(CraterlClientRef::craterl:craterl_client_ref(), Payload::map()) -> {ok, post()}|{error, term()}.
 create_post(CraterlClientRef, #{<<"text">> := Text,
                                 <<"user">> := User}=Payload) when is_map(User) and is_binary(Text) ->
-  Id = uuid:uuid_to_string(uuid:get_v4(weak), binary_standard),
+  Id = uuid:uuid_to_string(uuid:get_v4(strong), binary_standard),
   ImageRef = maps:get(<<"image_ref">>, Payload, null),
   case craterl:sql(CraterlClientRef, ?INSERT_STMT, [Id, ImageRef, Text, User]) of
     {ok, _Response} ->

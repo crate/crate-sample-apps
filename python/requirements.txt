@@ -1,5 +1,5 @@
 crash
 crate
-flask
+flask==0.10
 flask-restful
 flask-cors
