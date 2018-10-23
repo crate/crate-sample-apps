@@ -14,7 +14,7 @@
     <properties>
         <spark.version>2.7.2</spark.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
-        <apache.httpcomponents.version>4.3.5</apache.httpcomponents.version>
+        <apache.httpcomponents.version>4.5.6</apache.httpcomponents.version>
         <gson.version>2.5</gson.version>
         <crate-jdbc.version>2.1.7</crate-jdbc.version>
         <slf4j-simple.version>1.7.21</slf4j-simple.version>
