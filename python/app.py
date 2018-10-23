@@ -40,9 +40,9 @@ from flask import (
     jsonify
 )
 
-from flask.ext.restful import Api, Resource
-from flask.ext.restful.reqparse import RequestParser
-from flask.ext.cors import CORS
+from flask_restful import Api, Resource
+from flask_restful import reqparse as reqparser
+from flask_cors import CORS
 
 # app configuration
 CRATE_HOST = 'localhost:4200'
@@ -121,7 +121,7 @@ class Post(PostResource):
             return self.not_found(id=id)
 
     def put(self, id):
-        reqparse = RequestParser()
+        reqparse = reqparser.RequestParser()
         reqparse.add_argument('text', type=str, location='json')
         data = reqparse.parse_args()
         if not data.text:
@@ -169,7 +169,7 @@ class PostList(PostResource):
 
     def post(self):
         # parse incoming POST data
-        reqparse = RequestParser()
+        reqparse = reqparser.RequestParser()
         reqparse.add_argument('user', type=dict, location='json')
         reqparse.add_argument('text', type=str, location='json')
         reqparse.add_argument('image_ref', type=str, location='json')
@@ -249,7 +249,7 @@ class Search(PostResource):
 
     def post(self):
         # parse incoming POST data
-        reqparse = RequestParser()
+        reqparse = reqparser.RequestParser()
         reqparse.add_argument('query_string', type=str, location='json')
         data = reqparse.parse_args()
         # check for required data
@@ -337,7 +337,7 @@ class ImageList(ImageResource):
 
     def post(self):
         # parse incoming POST data
-        reqparse = RequestParser()
+        reqparse = reqparser.RequestParser()
         reqparse.add_argument('blob', type=str, location='json')
         data = reqparse.parse_args()
         if not data.blob:
