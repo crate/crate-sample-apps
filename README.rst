@@ -63,8 +63,7 @@ Help
 
 Looking for more help?
 
-- Check `StackOverflow`_ for common problems
-- Chat with us on `Slack`_
+- Chat with us via our `support channel`_
 - Get `paid support`_
 
 .. _client library: https://crate.io/docs/clients/
@@ -88,5 +87,4 @@ Looking for more help?
 .. _PHP: php
 .. _Python: python
 .. _REST API: https://crate.io/docs/clients/rest/
-.. _Slack: https://crate.io/docs/support/slackin/
-.. _StackOverflow: https://stackoverflow.com/tags/crate
+.. _support channel: https://crate.io/support/
