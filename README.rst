@@ -63,7 +63,7 @@ Help
 
 Looking for more help?
 
-- Chat with us via our `support channel`_
+- Chat with us via our `support channels`_
 - Get `paid support`_
 
 .. _client library: https://crate.io/docs/clients/
