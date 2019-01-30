@@ -64,7 +64,6 @@ Help
 Looking for more help?
 
 - Chat with us via our `support channels`_
-- Get `paid support`_
 
 .. _client library: https://crate.io/docs/clients/
 .. _contribution docs: CONTRIBUTING.rst
@@ -81,10 +80,9 @@ Looking for more help?
 .. _Getting Started: https://crate.io/docs/getting-started/
 .. _Java: java
 .. _JDBC: http://www.oracle.com/technetwork/java/overview-141217.html
-.. _paid support: https://crate.io/pricing/
 .. _PDO: http://at2.php.net/manual/en/book.pdo.php
 .. _pgjdbc: https://github.com/pgjdbc/pgjdbc
 .. _PHP: php
 .. _Python: python
 .. _REST API: https://crate.io/docs/clients/rest/
-.. _support channel: https://crate.io/support/
+.. _support channels: https://crate.io/support/
