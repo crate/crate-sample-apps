@@ -2,6 +2,8 @@
 Python Backend App
 ==================
 
+This project is community maintained, any contributions are welcome.
+
 A Python backend app using Flask_ and the crate_ Python library, which is an
 implementation of the standard `Python DB API`_ with support for SQLAlchemy_.
 

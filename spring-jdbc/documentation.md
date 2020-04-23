@@ -4,11 +4,7 @@
 
 ## Installation
 
-Staring from 0.57.0 Crate supports for the [PostgreSQL wire protocol v3][1].
-To get more detail information on the protocol support by Crate,
-please have a look at the [documentation][2].
-
-In the sample application, we use the [Crate JDBC driver 2.1.7][3] which
+In this sample application, we use the [Crate JDBC driver 2.6.0][3] which
 uses [PostgreSQL wire protocol v3][1]. To obtain the [Crate JDBC driver][4],
 please follow [instructions][5] for the build tool of your choice.
 
@@ -34,16 +30,15 @@ For all statements Spring's JDBC template is used. E.g reading a blog post from 
 
 ```java
     public Optional<BlogPost> getPost(@NonNull String id) {
-
-        List<BlogPost> queryResult = this.jdbcTemplate.query(String.format(
+        List<BlogPost> queryResult = this.jdbcTemplate.query(
                 "SELECT p.id as id, p.text as text, "
                         + "p.\"user\"['name'] as username, p.\"user\"['location'] as userlocation, "
                         + "p.created as created, c.name as country, c.geometry as area, "
-                        + "p.image_ref as imageRef, p.like_count as likes " + "FROM %s AS p, %s AS c "
-                        + "WHERE within(p.\"user\"['location'], c.geometry) " + "AND p.id = ?",
-                POST_TABLE, COUNTRIES_TABLE), (rs, rowNum) -> stdRowMapper.apply(rs), id);
+                        + "p.image_ref as imageRef, p.like_count as likes " + "FROM guestbook.posts AS p, guestbook.countries AS c "
+                        + "WHERE within(p.\"user\"['location'], c.geometry) " + "AND p.id = ?"
+                , blogPostRowMapper, id);
 
-        return queryResult != null && queryResult.size() == 1 ? Optional.of(queryResult.get(0)) : Optional.empty();
+        return queryResult.size() == 1 ? Optional.of(queryResult.get(0)) : Optional.empty();
     }
 ```
 
@@ -62,19 +57,18 @@ into a newly allocated byte array and compute its _sha1_ digest:
 ```java
     @PostMapping("/images")
     public Map<String, String> insertImage(@RequestBody Map<String, Object> imageProps, HttpServletResponse response) {
-
         logger.debug("Inserting image into database");
-        if (imageProps == null)
+        if (imageProps == null) {
             throw new ArgumentRequiredException("Request body is required");
-        else if (!imageProps.containsKey("blob"))
+        } else if (!imageProps.containsKey("blob")) {
             throw new ArgumentRequiredException("Argument \"blob\" is required");
+        }
 
-        byte[] decodedBytes = Base64.getDecoder().decode((String)imageProps.get("blob"));
-        String digest = DigestUtils.sha1Hex(decodedBytes);
+        var decodedBytes = Base64.getDecoder().decode((String) imageProps.get("blob"));
+        var digest = DigestUtils.sha1Hex(decodedBytes);
 
-        Map<String, String> responseMap = this.dao.insertImage(digest, decodedBytes);
+        var responseMap = dao.insertImage(digest, decodedBytes);
         response.setStatus(Integer.parseInt(responseMap.get("status")));
-
         return responseMap;
     }
 ```
@@ -85,18 +79,16 @@ body is the decoded _Base64_ encoded string:
 ```java
     @Override
     public Map<String, String> insertImage(final String digest, byte[] decoded) {
-
-        var request = HttpRequest.newBuilder(this.createBlobUri(digest)).
-            PUT(BodyPublishers.ofByteArray(decoded)).build();
-
+        var blobUri = this.createBlobUri(digest);
+        var request = HttpRequest.newBuilder(blobUri).
+                PUT(BodyPublishers.ofByteArray(decoded)).build();
         try {
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Map<String, String> result = new HashMap<String, String>();
+            var result = new HashMap<String, String>();
             result.put("digest", digest);
             result.put("url", "/image/" + digest);
             result.put("status", String.valueOf(response.statusCode()));
             return result;
-
         } catch (IOException | InterruptedException e) {
             throw new DataIntegrityViolationException("Failed to call blob endpoint", e);
         }
@@ -111,18 +103,13 @@ To download a blob use the HTTP GET request:
 ```java
     @Override
     public InputStream getImageAsInputStream(final String digest) {
-
-        InputStream result = null;
-
         var request = HttpRequest.newBuilder(this.createBlobUri(digest)).GET().build();
         try {
-            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            result = response.body();
+            var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return response.body();
         } catch (IOException | InterruptedException e) {
             throw new DataIntegrityViolationException("Failed to call blob endpoint", e);
         }
-
-        return result;
     }
 ```
 
@@ -132,20 +119,16 @@ request:
 ```java
     @Override
     public boolean imageExists(@NonNull final String digest) {
-
-        boolean result = false;
-
-        var request = HttpRequest.newBuilder(this.createBlobUri(digest))
-                .method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
-
+        var request = HttpRequest
+                .newBuilder(this.createBlobUri(digest))
+                .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                .build();
         try {
-            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-            result = response.statusCode() == HttpStatus.OK.value();
+            var response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            return response.statusCode() == HttpStatus.OK.value();
         } catch (IOException | InterruptedException e) {
             throw new DataIntegrityViolationException("Failed to call blob endpoint", e);
         }
-
-        return result;
     }
 ```
 
@@ -154,18 +137,13 @@ To delete a blob use the HTTP DELETE request:
 ```java
     @Override
     public boolean deleteImage(@NonNull final String digest) {
-
-        boolean result = false;
-
         var request = HttpRequest.newBuilder(this.createBlobUri(digest)).DELETE().build();
         try {
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            result = response.statusCode() == HttpStatus.OK.value();
+            return response.statusCode() == HttpStatus.OK.value();
         } catch (IOException | InterruptedException e) {
             throw new DataIntegrityViolationException("Failed to call blob endpoint", e);
         }
-
-        return result;
     }
 ```
 

@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.crate.spring.jdbc.samples.da.ImagesDao;
-import io.crate.spring.jdbc.samples.domain.Image;
+import io.crate.spring.jdbc.samples.dao.ImagesDao;
+import io.crate.spring.jdbc.samples.model.Image;
 
 @RestController
 public class ImagesController {
@@ -40,21 +40,17 @@ public class ImagesController {
 
     @GetMapping("/images")
     public List<Map<String, Object>> getImages() {
-        
         logger.debug("Searching for images in database");
-        List<Image> images = this.dao.getImages();      
+        var images = this.dao.getImages();
         logger.info("Found " + images.size() + " in database");
-
         return this.convertToStdResult(images);
     }
 
     @RequestMapping(value = "/image/{digest}", method = RequestMethod.GET)
     public void getImageAsByteArray(HttpServletResponse response, @PathVariable String digest) throws IOException {
-
         logger.debug("Downloading image with digest " + digest);
-
-        if (this.dao.imageExists(digest)) {
-            InputStream in = this.dao.getImageAsInputStream(digest);
+        if (dao.imageExists(digest)) {
+            InputStream in = dao.getImageAsInputStream(digest);
             response.setContentType(MediaType.IMAGE_GIF_VALUE);
             IOUtils.copy(in, response.getOutputStream());
         } else {
@@ -64,11 +60,9 @@ public class ImagesController {
 
     @DeleteMapping("/image/{digest}")
     public void deleteImage(@PathVariable String digest) {
-
         logger.debug("Deleting image with digest " + digest);
-
         if (this.dao.imageExists(digest)) {
-           this.dao.deleteImage(digest);
+            this.dao.deleteImage(digest);
         } else {
             throw new ImageNotExistsException(digest);
         }
@@ -76,30 +70,25 @@ public class ImagesController {
 
     @PostMapping("/images")
     public Map<String, String> insertImage(@RequestBody Map<String, Object> imageProps, HttpServletResponse response) {
-
         logger.debug("Inserting image into database");
-        if (imageProps == null)
+        if (imageProps == null) {
             throw new ArgumentRequiredException("Request body is required");
-        else if (!imageProps.containsKey("blob"))
+        } else if (!imageProps.containsKey("blob")) {
             throw new ArgumentRequiredException("Argument \"blob\" is required");
+        }
 
-        byte[] decodedBytes = Base64.getDecoder().decode((String)imageProps.get("blob"));
-        String digest = DigestUtils.sha1Hex(decodedBytes);
+        var decodedBytes = Base64.getDecoder().decode((String) imageProps.get("blob"));
+        var digest = DigestUtils.sha1Hex(decodedBytes);
 
-        Map<String, String> responseMap = this.dao.insertImage(digest, decodedBytes);
+        var responseMap = dao.insertImage(digest, decodedBytes);
         response.setStatus(Integer.parseInt(responseMap.get("status")));
-
         return responseMap;
     }
 
     private List<Map<String, Object>> convertToStdResult(final List<Image> images) {
-
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-
-        if (images != null && !images.isEmpty()) {
-            for(Image image : images) {
-                result.add(this.imagesSerializer.serialize(image));
-            }
+        var result = new ArrayList<Map<String, Object>>();
+        for (var image : images) {
+            result.add(imagesSerializer.serialize(image));
         }
         return result;
     }

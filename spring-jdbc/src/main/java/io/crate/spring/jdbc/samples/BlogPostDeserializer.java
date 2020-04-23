@@ -6,31 +6,33 @@ import java.util.Map;
 
 import org.springframework.lang.NonNull;
 
-import io.crate.spring.jdbc.samples.domain.BlogPost;
-import io.crate.spring.jdbc.samples.domain.User;
+import io.crate.spring.jdbc.samples.model.BlogPost;
+import io.crate.spring.jdbc.samples.model.User;
 
 public class BlogPostDeserializer {
 
     @SuppressWarnings("unchecked")
     public BlogPost fromMap(@NonNull final Map<String, Object> postProps) {
+        var post = new BlogPost();
+        var id = postProps.get("id");
 
-        BlogPost post = new BlogPost();
-        if (postProps.containsKey("id"))
-            post.setId(postProps.get("id").toString());
-        if (postProps.containsKey("user")) {
-            Map<String, Object> user = (Map<String, Object>) postProps.get("user");
-            if (user != null)
-            {
-                User anUser = new User((String)user.get("name"));
-                List<Double> locationValues = (List<Double>)user.get("location");
-                anUser.setLon(locationValues.get(0)); anUser.setLat(locationValues.get(1));
-                post.setUser(anUser);
+        if (id != null) {
+            post.setId(id.toString());
+        }
+       var userData = (Map<String, Object>) postProps.get("user");
+
+        if (userData != null) {
+            String name = (String) userData.get("name");
+            var location = (List<Double>) userData.get("location");
+            if (name != null && location != null && location.size() == 2) {
+                post.setUser(new User(name, location.get(0), location.get(1)));
             }
         }
-        post.setText((String)postProps.get("text"));
-        post.setImage_ref((String)postProps.get("image_ref"));
+
+        post.setText((String) postProps.get("text"));
+        post.setImageRef((String) postProps.get("image_ref"));
         post.setCreated(new Date());
-        post.setLike_count(0);
+        post.setLikeCount(0);
 
         return post;
     }

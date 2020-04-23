@@ -1,6 +1,5 @@
 package io.crate.spring.jdbc.samples;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -16,10 +15,7 @@ public class ArgumentRequiredAdvice {
     @ExceptionHandler(ArgumentRequiredException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     Map<String, Object> postNotFoundHandler(ArgumentRequiredException ex) {
-        Map<String, Object> responseMap = new HashMap<String, Object>();
-        responseMap.put("status", HttpStatus.BAD_REQUEST);
-        responseMap.put("error", ex.getMessage());
-        return responseMap;
+        return Map.of("status", HttpStatus.BAD_REQUEST, "error", ex.getMessage());
     }
 
 }

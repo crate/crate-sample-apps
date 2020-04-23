@@ -1,6 +1,5 @@
 package io.crate.spring.jdbc.samples;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -16,9 +15,6 @@ public class PostNotFoundAdvice {
     @ExceptionHandler(PostNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     Map<String, Object> postNotFoundHandler(PostNotFoundException ex) {
-        Map<String, Object> responseMap = new HashMap<String, Object>();
-        responseMap.put("status", HttpStatus.NOT_FOUND);
-        responseMap.put("error", ex.getMessage());
-        return responseMap;
+        return Map.of("status", HttpStatus.NOT_FOUND, "error", ex.getMessage());
     }
 }
