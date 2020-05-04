@@ -48,13 +48,13 @@ The are several implementations of the backend REST API:
 - Python_ (using dbapi_, crate-python_)
 - PHP_ (using PDO_, crate-pdo_)
 - Java_ (using JDBC_, pgjdbc_)
+- Java-Spring_ (using  `Spring Boot`_, `Spring Data JDBC`_)
 - Erlang_ (using Erlang_, craterl_)
 
 Contributing
 ============
 
-This project is primarily maintained by Crate.io_, but we welcome community
-contributions!
+This project is community maintained, any contributions are welcome.
 
 See the `developer docs`_ and the `contribution docs`_ for more information.
 
@@ -80,6 +80,9 @@ Looking for more help?
 .. _Getting Started: https://crate.io/docs/getting-started/
 .. _Java: java
 .. _JDBC: http://www.oracle.com/technetwork/java/overview-141217.html
+.. _Java-Spring: https://spring.io/
+.. _Spring Data JDBC: https://spring.io/projects/spring-data-jdbc
+.. _Spring Boot: https://spring.io/projects/spring-boot
 .. _PDO: http://at2.php.net/manual/en/book.pdo.php
 .. _pgjdbc: https://github.com/pgjdbc/pgjdbc
 .. _PHP: php

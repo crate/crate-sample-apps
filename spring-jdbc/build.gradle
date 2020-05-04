@@ -1,0 +1,45 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.6.RELEASE")
+    }
+}
+
+version = '0.0.1-SNAPSHOT'
+
+processResources.destinationDir = compileJava.destinationDir
+compileJava.dependsOn processResources
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+jar {
+    baseName = 'crate-spring-jdbc-sample'
+    version =  version
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url "http://repo.spring.io/libs-snapshot" }
+    maven { url "http://repo.spring.io/milestone" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+dependencies {
+    implementation 'io.crate:crate-jdbc:2.6.0'
+    implementation 'commons-codec:commons-codec:1.14'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.2.6.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.2.6.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.2.6.RELEASE'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.6.RELEASE'
+    testImplementation 'junit:junit'
+}
+
+idea.module.inheritOutputDirs = true
