@@ -1,0 +1,14 @@
+server:
+  host: 127.0.0.1
+  port: 8080
+
+crate:
+  host: 127.0.0.1
+  pg_port: 5432
+  http_port: 4200
+  username: crate
+  password:
+
+blob:
+  blob_url: http://localhost:4200/_blobs/
+  blob_mime: image/gif
