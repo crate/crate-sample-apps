@@ -1,28 +1,28 @@
-# The Crate JDBC Sample Application
+# The CrateDB JDBC Sample Application
 **Note:** The application is written in Java 8.
 
 ## Installation
-Staring from 0.57.0 Crate supports for the [PostgreSQL wire protocol v3][1].
+Staring from 0.57.0, CrateDB supports for the [PostgreSQL wire protocol v3][1].
 To get more detail information on the protocol support by Crate,
 please have a look at the [documentation][2].
 
-In the sample application, we use the [Crate JDBC driver 2.0.x][3] which
-uses [PostgreSQL wire protocol v3][1]. To obtain the [Crate JDBC driver][4],
+In the sample application, we use the [CrateDB JDBC driver 2.0.x][3] which
+uses [PostgreSQL wire protocol v3][1]. To obtain the [CrateDB JDBC driver][4],
 please follow [instructions][5] for the build tool of your choice.
 
 
 ## Usage
 
-### Connecting to Crate
+### Connecting to CrateDB
 
-The application establishes the connection with Crate using the
+The application establishes the connection with CrateDB using the
 `DriverManager.getConnection()` method.
 
 ```java
 Connection connection = DriverManager.getConnection("jdbc:crate://<host>:5432/");
 ```
 
-Please, take a look at the Crate JDBC driver documentation to see the
+Please, take a look at the CrateDB JDBC driver documentation to see the
 [possible forms][6] of URLs supported by the driver.
 
 ### Executing statements
@@ -154,8 +154,8 @@ private final CheckedFunction<ResultSet, Map<String, Object>> resultSetToMap = r
 ```
 
 ### Handling BLOBs
-Crate does not support handling of BLOBs via the JDBC driver. Therefore,
-in the sample application we use the Crate [RESTful BLOB API][7] and
+CrateDB does not support handling of BLOBs via the JDBC driver. Therefore,
+in the sample application we use the CrateDB [RESTful BLOB API][7] and
 [Apache HTTP components][8] library to handle uploading, removing
 and retrieving BLOB data.
 

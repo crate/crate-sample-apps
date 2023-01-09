@@ -1,45 +1,42 @@
+.. highlight:: sh
+
 ================
 Java Backend App
 ================
 
-A Java backend app using Spark_ and the `CrateDB JDBC driver`_.
+A backend application written in Java, using Spark_ and the `CrateDB JDBC driver`_.
+
 
 Prerequisites
 =============
 
-You will need `Java 8`_ and Apache Maven installed.
-
-You will need CrateDB 0.57.0 or higher.
+- You will need `Java 8`_ and Apache Maven installed.
+- You will need CrateDB 0.57.0 or higher
 
 Build
 =====
 
-You can build the app like so:
+Build the application::
 
-.. code-block:: sh
-
-    $ mvn clean install
+    mvn clean install
 
 Run
 ===
 
-You can the app like so:
+Invoke the application::
 
-.. code-block:: sh
+    mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App"
 
-    $ mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App"
+Then, open the application::
 
-Then, open the app:
+    open http://localhost:8080/
 
-    http://localhost:8080/
+Run the application on a specific port::
 
-To run the application on a specific port, do this:
+    mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App" -Dexec.args="8080"
 
-.. code-block:: sh
 
-    $ mvn exec:java -Dexec.mainClass="io.crate.jdbc.sample.App" -Dexec.args="8080"
-
-.. _Spark: http://sparkjava.com/
-.. _CrateDB JDBC driver: https://crate.io/docs/clients/jdbc/
-.. _Java 8: http://www.oracle.com/technetwork/java/javase/overview/java8-2100321.html
 .. _Apache Maven: https://maven.apache.org/index.html
+.. _CrateDB JDBC driver: https://crate.io/docs/clients/jdbc/
+.. _Java 8: https://www.oracle.com/java/technologies/java8.html
+.. _Spark: https://sparkjava.com/
