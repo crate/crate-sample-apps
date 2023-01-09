@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>crate.io</groupId>
-    <artifactId>crate-pgjdbc-app</artifactId>
+    <artifactId>java-spark-crate-jdbc-example</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>The CrateDB JDBC Sample Application</name>
+    <name>The CrateDB JDBC Sample Application, using Spark and crate-jdbc</name>
     <url>https://crate.io/docs/reference/en/latest/protocols/postgres.html</url>
 
     <properties>
