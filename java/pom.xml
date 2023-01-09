@@ -8,7 +8,7 @@
     <artifactId>crate-pgjdbc-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>The Crate JDBC Sample Application</name>
+    <name>The CrateDB JDBC Sample Application</name>
     <url>https://crate.io/docs/reference/en/latest/protocols/postgres.html</url>
 
     <properties>
