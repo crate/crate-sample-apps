@@ -20,16 +20,16 @@ Build
 
 Build the application with `Gradle`_::
 
-    gradle clean build
+    ./gradlew clean build
 
 Run
 ===
 
 Start the application::
 
-    gradle bootRun
+    ./gradlew bootRun
 
-Then, open the app::
+Then, open the application URL::
 
     open http://localhost:8080/
 
