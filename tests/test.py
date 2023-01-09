@@ -326,7 +326,7 @@ def main():
     suite = unittest.TestSuite()
     suite.addTest(parametrize(PostsTestCase, options=args))
     suite.addTest(parametrize(ImagesTestCase, options=args))
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=3).run(suite)
 
 
 if __name__ == '__main__':

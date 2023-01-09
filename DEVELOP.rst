@@ -1,3 +1,5 @@
+.. highlight:: sh
+
 ===============
 Developer Guide
 ===============
@@ -10,11 +12,9 @@ See the `API spec`_ document for more info.
 Integration Tests
 =================
 
-Run the integration tests like so:
-
-.. code-block:: sh
+Run the integration tests::
 
     cd tests
-    python3.4 tests.py --host SERVER_IP --port 4200
+    python3 test.py --host localhost --port 8080
 
 .. _API spec: SPEC.md

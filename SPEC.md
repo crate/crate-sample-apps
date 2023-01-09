@@ -1,4 +1,4 @@
-# Backend API Spec for Crate Sample App
+# Backend API Spec for CrateDB Sample App
 
 ## Content Type
 
