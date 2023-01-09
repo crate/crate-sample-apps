@@ -20,7 +20,7 @@ sourceCompatibility = '11'
 targetCompatibility = '11'
 
 jar {
-    baseName = 'crate-spring-jdbc-sample'
+    baseName = 'java-spring-crate-jdbc-example'
     version =  version
 }
 
