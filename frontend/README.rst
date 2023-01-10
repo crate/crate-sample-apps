@@ -1,26 +1,28 @@
+.. highlight:: sh
+
 ========
 Frontend
 ========
 
-The frontend is written in AngularJS_ 1.4.8.
+- The frontend is written in `AngularJS`_ 1.4.8.
+- Python 3 is needed to run a minimal web server, `http.server`_.
+- The single file, `app.js`_, contains all the application logic.
 
-The single file, app.js_, contains all the application logic.
 
-Serving The Application
+Serving the application
 =======================
 
 (Please make sure that python3 is installed)
 
-The simplest way to serve the frontend is like so:
+Serve the frontend::
 
-.. code-block:: sh
+    cd frontend
+    python3 -m http.server
 
-    $ cd frontend
-    $ python -m http.server
+Then, open the application in your browser::
 
-Then, open the application in your browser:
+    open http://localhost:8000/index.html
 
-    http://localhost:8000/index.html
 
 .. _AngularJS: https://angularjs.org/
 .. _app.js: app.js
