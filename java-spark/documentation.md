@@ -2,8 +2,8 @@
 **Note:** The application is written in Java 8.
 
 ## Installation
-Staring from 0.57.0, CrateDB supports for the [PostgreSQL wire protocol v3][1].
-To get more detail information on the protocol support by Crate,
+CrateDB supports the [PostgreSQL wire protocol v3][1].
+To get more detail information on the protocol support by CrateDB,
 please have a look at the [documentation][2].
 
 In the sample application, we use the [CrateDB JDBC driver 2.0.x][3] which

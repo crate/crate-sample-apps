@@ -10,8 +10,8 @@ A backend application written in Java, using Spark_ and the `CrateDB JDBC driver
 Prerequisites
 =============
 
+- You will need CrateDB installed and running locally.
 - You will need `Java 8`_ and Apache Maven installed.
-- You will need CrateDB 0.57.0 or higher
 
 Build
 =====
