@@ -179,7 +179,12 @@ angular.module('app', [])
 
     // create new post
     this.submitForm = function() {
-      if (!$scope.formdata.user.location) return;
+
+      // Not all geolocation APIs return values, some users may have disabled them.
+      // When there is no location detected, fill one in as a fallback.
+      // if (!$scope.formdata.user.location) return;
+      if (!$scope.formdata.user.location) $scope.formdata.user.location = [9.744417, 47.413417];
+
       if ($scope.imagedata) {
         uploadBlob($scope.imagedata).then(function(response) {
           $scope.formdata.image_ref = response.data.digest;
