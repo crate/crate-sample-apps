@@ -40,15 +40,15 @@ commands::
         --volume=$(pwd)/sql:/sql \
         --publish=4200:4200 --publish=5432:5432 ${CRATEDB_IMAGE}
 
-    # Populate schema and data.
-    docker run --rm -it --network=host --volume=$(pwd)/sql:/sql ${CRATEDB_IMAGE} \
-        sh -c 'cat /sql/schemas.sql | crash'
-    docker run --rm --network=host --volume=$(pwd)/sql:/sql ${CRATEDB_IMAGE} \
-        crash -c "COPY guestbook.countries FROM 'file:///sql/countries.json' RETURN SUMMARY;"
-
-    # Validate data.
-    docker run --rm -it --network=host --volume=$(pwd)/sql:/sql ${CRATEDB_IMAGE} \
-        crash -c "SELECT id, name FROM guestbook.countries"
+    # Populate schema and data, and verify it's there.
+    docker run --rm --network=host --volume=$(pwd)/sql:/sql ${CRATEDB_IMAGE} sh -c "$(cat <<EOT
+        crash < /sql/schemas.sql;
+        crash <<SQL
+            COPY guestbook.countries FROM 'file:///sql/countries.json' RETURN SUMMARY;
+            REFRESH TABLE guestbook.countries;
+            SELECT id, name FROM guestbook.countries LIMIT 10;
+    SQL
+    EOT)"
 
 
 Components
