@@ -1,18 +1,18 @@
-# The Crate JDBC Sample Application
+# The CrateDB JDBC Sample Application
 
 **Note:** The application is written in Java 11.
 
 ## Installation
 
-In this sample application, we use the [Crate JDBC driver 2.6.0][3] which
-uses [PostgreSQL wire protocol v3][1]. To obtain the [Crate JDBC driver][4],
+In this sample application, we use the [CrateDB JDBC driver 2.6.0][3], which
+uses [PostgreSQL wire protocol v3][1]. To obtain the [CrateDB JDBC driver][4],
 please follow [instructions][5] for the build tool of your choice.
 
 ## Usage
 
 ### Connecting to Crate
 
-The application establishes the connection with Crate using a Spring JDBC datasource configured in the `application.properties` file:
+The application establishes the connection with CrateDB using a Spring JDBC datasource configured in the `application.properties` file:
 
 ```text
 spring.datasource.url=jdbc:crate://localhost:5432/
@@ -21,7 +21,7 @@ spring.datasource.password=
 spring.datasource.driver-class-name=io.crate.client.jdbc.CrateDriver
 ```
 
-Please, take a look at the Crate JDBC driver documentation to see the
+Please, take a look at the CrateDB JDBC driver documentation to see the
 [possible forms][6] of URLs supported by the driver.
 
 ### Executing statements
@@ -44,8 +44,8 @@ For all statements Spring's JDBC template is used. E.g reading a blog post from 
 
 ### Handling BLOBs
 
-Crate does not support handling of BLOBs via the JDBC driver. Therefore,
-in the sample application we use the Crate [RESTful BLOB API][7] and
+CrateDB does not support handling of BLOBs via the JDBC driver. Therefore,
+in the sample application we use the CrateDB [RESTful BLOB API][7] and
 Java's Http Client class to handle uploading, removing
 and retrieving BLOB data.
 
@@ -154,7 +154,7 @@ should have the following format:
 http://localhost:4200/_blobs/guestbook_images/<digest>
 ```
 
-If a blob does not exist an HTTP status code 404 Not Found is returned.
+If a blob does not exist, an HTTP status code `404 Not Found` is returned.
 
 [1]: https://www.postgresql.org/docs/current/static/protocol.html
 [2]: https://crate.io/docs/reference/en/latest/protocols/postgres.html
