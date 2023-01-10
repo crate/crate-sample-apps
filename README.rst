@@ -13,8 +13,8 @@ each using a different `client library`_ to communicate with CrateDB_.
 Prerequisites
 =============
 
-- You need install and run CrateDB 0.54.1 or higher before you set things up.
-- If you're using the Java backend, you will need 0.57.0 or higher.
+- You need install and run CrateDB before proceeding with the software found
+  within this repository.
 - You will also need to install crash_, the CrateDB CLI tool, to work with CrateDB
   on the command line.
 - See the CrateDB `Getting Started`_ guide for help.
@@ -28,11 +28,11 @@ country data::
     crash < sql/schemas.sql
     crash -c "COPY guestbook.countries FROM '$(pwd)/sql/countries.json' RETURN SUMMARY;"
 
-If you choose to use Docker for running CrateDB on your workstation, those
-commands outline the process::
+If you choose to use Docker for running CrateDB on your workstation, use those
+commands::
 
     # Define CrateDB version.
-    export CRATEDB_VERSION=5.1.2
+    export CRATEDB_VERSION=latest
     export CRATEDB_IMAGE=crate:${CRATEDB_VERSION}
 
     # Start CrateDB.
