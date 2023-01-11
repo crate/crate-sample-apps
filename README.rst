@@ -63,13 +63,19 @@ communicates with the backend over a `REST API`_.
 Backends
 --------
 
-The are several implementations of the backend REST API:
+The are several implementations of the backend REST API.
 
 - Python_ (using dbapi_, crate-python_)
 - PHP_ (using PDO_, crate-pdo_)
 - `Java (Spark)`_ (using Spark_, JDBC_, `CrateDB JDBC driver`_)
 - `Java (Spring)`_ (using  `Spring Boot`_, `Spring Data JDBC`_, `CrateDB JDBC driver`_)
 - Erlang_ (using Erlang_, craterl_)
+
+You can submit HTTP requests from the console to the backend service,
+for example by using the excellent `HTTPie`_ program::
+
+    http localhost:8080/posts user:='{"name": "John Doe", "location": [9.744417, 47.413417]}' text="Hello, world." --print HhBb
+
 
 Contributing
 ============
@@ -99,15 +105,16 @@ Looking for more help?
 .. _Erlang: erlang
 .. _frontend: frontend
 .. _Getting Started: https://crate.io/docs/getting-started/
+.. _HTTPie: https://httpie.io/
 .. _Java (Spark): java-spark
 .. _Java (Spring): java-spring
 .. _JDBC: https://docs.oracle.com/javase/tutorial/jdbc/
-.. _Spark: https://sparkjava.com/
-.. _Spring Boot: https://spring.io/projects/spring-boot
-.. _Spring Data JDBC: https://spring.io/projects/spring-data-jdbc
 .. _PDO: https://www.php.net/manual/en/book.pdo.php
 .. _pgjdbc: https://github.com/pgjdbc/pgjdbc
 .. _PHP: php
 .. _Python: python
 .. _REST API: https://crate.io/docs/clients/rest/
+.. _Spark: https://sparkjava.com/
+.. _Spring Boot: https://spring.io/projects/spring-boot
+.. _Spring Data JDBC: https://spring.io/projects/spring-data-jdbc
 .. _support channels: https://crate.io/support/
