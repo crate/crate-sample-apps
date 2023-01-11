@@ -1,17 +1,24 @@
 <?php
 error_reporting(E_STRICT);
 
-require 'vendor/autoload.php';
-$config = parse_ini_file('app.ini');
+use DI\Container;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Exception\HttpNotFoundException;
+use Slim\Factory\AppFactory;
 
-class CrateResource extends \Slim\Slim
+require 'vendor/autoload.php';
+
+
+class AppHelper
 {
     public $conn;
     public $config;
 
     function __construct($config)
     {
-        parent::__construct();
         $this->config = $config;
         $dsn = "{$config['db_host']}:{$config['db_port']}";
         $this->conn = new Crate\PDO\PDO($dsn, null, null, null);
@@ -20,91 +27,123 @@ class CrateResource extends \Slim\Slim
     function refreshTable($table)
     {
         $qry = $this->conn->prepare("REFRESH TABLE {$table}");
-        $result = $qry->execute();
+        return $qry->execute();
     }
 
-    function argument_required($message)
+    function argument_required(Response $response, $message)
     {
-        $this->resource_error(400, $message);
+        return $this->resource_error($response, 400, $message);
     }
 
-    function not_found($message)
+    function not_found(Response $response, $message)
     {
-        $this->resource_error(404, $message);
+        return $this->resource_error($response, 404, $message);
     }
 
-    function resource_error($status, $message, $contenttype = 'application/json')
+    function resource_error(Response $response, $status, $message, $contenttype = 'application/json')
     {
-        $this->response->headers->set('Content-Type', $contenttype);
-        $this->response->setStatus($status);
-        $this->response->write(json_encode(array(
+        $payload = json_encode(array(
             "error" => $message,
             "status" => $status
-        )));
+        ));
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', $contenttype)
+            ->withStatus($status);
     }
 
-    function success($status, $result, $contenttype = 'application/json')
+    function success(Response $response, $status, $result, $contenttype = 'application/json')
     {
-        $this->response->headers->set('Content-Type', $contenttype);
-        $this->response->setStatus($status);
-        $this->response->write(json_encode($result));
+        $payload = json_encode($result);
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', $contenttype)
+            ->withStatus($status);
     }
 }
 
-$app = new CrateResource($config);
-// apply CORS headers to all responses
-$app->add(new \CorsSlim\CorsSlim());
+
+class JsonBodyParserMiddleware implements MiddlewareInterface
+{
+    // https://www.slimframework.com/docs/v4/objects/request.html#the-request-body
+    public function process(Request $request, RequestHandler $handler): Response
+    {
+        $contentType = $request->getHeaderLine('Content-Type');
+
+        if (strstr($contentType, 'application/json')) {
+            $contents = json_decode(file_get_contents('php://input'), true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $request = $request->withParsedBody($contents);
+            }
+        }
+        return $handler->handle($request);
+    }
+}
+
+
+$container = new Container();
+AppFactory::setContainer($container);
+
+$container->set('helper', function () {
+    $config = parse_ini_file('app.ini');
+    return new AppHelper($config);
+});
+
+$app = AppFactory::create();
+$app->add(JsonBodyParserMiddleware::class);
 
 /**
  * Default action.
  */
-$app->get('/', function() use ($app)
+$app->get('/', function (Request $req, Response $res, $args = [])
 {
-    $app->success(200, 'Server up and running');
-})->name('default');
+    $helper = $this->get('helper');
+    return $helper->success($res, 200, 'Server up and running');
+})->setName('default');
 
 /**
  * Get the post for a given id.
  */
-$app->get('/post/:id', function($id) use ($app)
+$app->get('/post/{id}', function (Request $req, Response $res, $args = [])
 {
-    $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
+    $helper = $this->get('helper');
+    $id = $args["id"];
+    $qry = $helper->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
             WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
     $qry->bindParam(1, $id);
     $qry->execute();
     $result = $qry->fetch(PDO::FETCH_ASSOC);
     if (!$result) {
-        $app->not_found("Post with id=\"{$id}\" not found");
+        return $helper->not_found($res, "Post with id=\"{$id}\" not found");
     } else {
-        $app->success(200, $result);
+        return $helper->success($res, 200, $result);
     }
-})->name('post-get');
+})->setName('post-get');
+
 /**
- * insert a posts.
+ * Insert a post.
  */
-$app->post('/posts', function() use ($app)
+$app->post('/posts', function (Request $req, Response $res, $args = [])
 {
-    $data      = json_decode($app->request->getBody());
-    $user      = $data->user;
-    $text      = $data->text;
-    $image_ref = $data->image_ref;
+    $helper = $this->get('helper');
+    $data      = $req->getParsedBody();
+    $user      = $data["user"];
+    $text      = $data["text"];
+    $image_ref = $data["image_ref"];
 
     if (empty($user)) {
-        $app->argument_required('Argument "user" is required');
-        return;
-    } else if (empty($user->name)) {
-        $app->argument_required('Argument "name" is required');
-        return;
-    } else if (empty($user->location)) {
-        $app->argument_required('Argument "location" is required');
-        return;
+        return $helper->argument_required($res, 'Argument "user" is required');
+    } else if (empty($user["name"])) {
+        return $helper->argument_required($res, 'Argument "name" is required');
+    } else if (empty($user["location"])) {
+        return $helper->argument_required($res, 'Argument "location" is required');
     }
 
     $id        = uniqid();
     $now       = time() * 1000;
     $likeCount = 0;
-    $qry       = $app->conn->prepare("INSERT INTO guestbook.posts (
+    $qry       = $helper->conn->prepare("INSERT INTO guestbook.posts (
       id, \"user\", text, created, image_ref, like_count
     ) VALUES (
       ?, ?, ?, ?, ?, ?
@@ -119,230 +158,266 @@ $app->post('/posts', function() use ($app)
     $state = $qry->execute();
 
     if ($state) {
-        $app->refreshTable('guestbook.posts');
-        $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
+        $helper->refreshTable('guestbook.posts');
+        $qry = $helper->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
             WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
         $qry->bindParam(1, $id);
         $qry->execute();
         $result = $qry->fetchAll(PDO::FETCH_ASSOC);
-        $app->success(201, $result);
+        return $helper->success($res, 201, $result);
     } else {
-        $app->resource_error(500, $app->conn->errorInfo());
+        return $helper->resource_error($res, 500, $helper->conn->errorInfo());
     }
-})->name('post-post');
+})->setName('post-post');
 
 /**
- * sets the text of a post
+ * Set the text of a post.
  */
-$app->put('/post/:id', function($id) use ($app)
+$app->put('/post/{id}', function (Request $req, Response $res, $args = [])
 {
-    $data = json_decode($app->request->getBody());
+    $helper = $this->get('helper');
+    $id = $args["id"];
+    $data = $req->getParsedBody();
 
-    if(!$data || !isset($data->text)) {
-        $app->argument_required('Argument "text" is required');
-        return;
+    if(!$data || !isset($data["text"])) {
+        return $helper->argument_required($res, 'Argument "text" is required');
     }
 
-    $qry = $app->conn->prepare("UPDATE guestbook.posts SET text=? WHERE id=?");
-    $qry->bindParam(1, $data->text);
+    $qry = $helper->conn->prepare("UPDATE guestbook.posts SET text=? WHERE id=?");
+    $qry->bindParam(1, $data["text"]);
     $qry->bindParam(2, $id);
     $state = $qry->execute();
 
     if ($state) {
-        $app->refreshTable("guestbook.posts");
-        $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
+        $helper->refreshTable("guestbook.posts");
+        $qry = $helper->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
             WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
         $qry->bindParam(1, $id);
         $result = $qry->fetch(PDO::FETCH_ASSOC);
-        $app->success(200, $result);
+        return $helper->success($res, 200, $result);
     } else {
-        $app->resource_error(500, $app->conn->errorInfo());
+        return $helper->resource_error($res, 500, $helper->conn->errorInfo());
     }
-})->name('post-put');
+})->setName('post-put');
 
 /**
- * deletes a post with a given id.
+ * Delete a post with a given id.
  */
-$app->delete('/post/:id', function($id) use ($app)
+$app->delete('/post/{id}', function (Request $req, Response $res, $args = [])
 {
+    $helper = $this->get('helper');
+    $id = $args["id"];
     if (empty($id)) {
-        $app->not_found('Please provide a post id: /post/<id>');
-        return;
+        return $helper->not_found($res, 'Please provide a post id: /post/<id>');
     }
-    $qry = $app->conn->prepare("SELECT * FROM guestbook.posts WHERE id = ?");
+    $qry = $helper->conn->prepare("SELECT * FROM guestbook.posts WHERE id = ?");
     $qry->bindParam(1, $id);
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
     if (!$result) {
-        $app->not_found("Post with id=\"{$id}\" not found");
-        return;
+        return $helper->not_found($res, "Post with id=\"{$id}\" not found");
     }
 
-    $qry = $app->conn->prepare("DELETE FROM guestbook.posts WHERE id=?");
+    $qry = $helper->conn->prepare("DELETE FROM guestbook.posts WHERE id=?");
     $qry->bindParam(1, $id);
     $state = $qry->execute();
 
     if ($state) {
-      $app->response->setStatus(204);
+      return $res->withStatus(204);
     } else {
       // nothing deleted?
-      $app->not_found("Post with id=\"{$id}\" not deleted");
+      return $helper->not_found($res, "Post with id=\"{$id}\" not deleted");
     }
-})->name('post-delete');
+})->setName('post-delete');
 
 /**
- * increments the number of likes for a given post.
+ * Increment the number of likes for a given post.
  */
-$app->put('/post/:id/like', function($id) use ($app)
+$app->put('/post/{id}/like', function (Request $req, Response $res, $args = [])
 {
+    $helper = $this->get('helper');
+    $id = $args["id"];
     if (empty($id)) {
-        $app->not_found('Please provide a post id: /post/<id>/like');
-        return;
+        return $helper->not_found($res, 'Please provide a post id: /post/<id>/like');
     }
-    $qry = $app->conn->prepare("SELECT * FROM guestbook.posts WHERE id=?");
+    $qry = $helper->conn->prepare("SELECT * FROM guestbook.posts WHERE id=?");
     $qry->bindParam(1, $id);
     $result = $qry->execute();
     $row    = $qry->fetch(PDO::FETCH_ASSOC);
 
     if ($row) {
-        $qryU = $app->conn->prepare("UPDATE guestbook.posts SET like_count = like_count + 1 WHERE id=?");
+        $qryU = $helper->conn->prepare("UPDATE guestbook.posts SET like_count = like_count + 1 WHERE id=?");
         $qryU->bindParam(1, $id);
         $state = $qryU->execute();
 
         if ($state) {
-            $app->refreshTable("guestbook.posts");
-            $qryS = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
+            $helper->refreshTable("guestbook.posts");
+            $qryS = $helper->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
                 FROM guestbook.posts AS p, guestbook.countries AS c
                 WHERE within(p.\"user\"['location'], c.geometry) AND p.id = ?");
             $qryS->bindParam(1, $id);
             $result = $qryS->fetch(PDO::FETCH_ASSOC);
-            $app->success(200, $result);
+            return $helper->success($res, 200, $result);
         } else {
-            $app->resource_error(500, 'update statement went wrong');
+            return $helper->resource_error($res, 500, 'update statement went wrong');
         }
     } else {
-        $app->not_found("Post with id=\"{$id}\" not found");
+        return $helper->not_found($res, "Post with id=\"{$id}\" not found");
     }
-})->name('post-like-put');
+})->setName('post-like-put');
 
 /**
  * Get a list of all posts.
  */
-$app->get('/posts', function() use ($app)
+$app->get('/posts', function (Request $req, Response $res, $args = [])
 {
-    $qry = $app->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
+    $helper = $this->get('helper');
+    $qry = $helper->conn->prepare("SELECT p.*, c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
             WHERE within(p.\"user\"['location'], c.geometry)
             ORDER BY p.created DESC");
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
-    $app->success(200, $result);
-})->name('posts-get');
+    return $helper->success($res, 200, $result);
+})->setName('posts-get');
 
 /**
- * returns all images that are saved in the crate blob store.
+ * Return all images that are saved in the CrateDB blob store.
  */
-$app->get('/images', function() use ($app)
+$app->get('/images', function (Request $req, Response $res, $args = [])
 {
-    $qry = $app->conn->prepare("SELECT digest, last_modified FROM blob.guestbook_images");
+    $helper = $this->get('helper');
+    $qry = $helper->conn->prepare("SELECT digest, last_modified FROM blob.guestbook_images");
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
-    $app->success(200, $result);
-})->name('images-get');
+    return $helper->success($res, 200, $result);
+})->setName('images-get');
 
 /**
- * inserts an image
+ * Insert an image.
  */
-$app->post('/images', function() use ($app)
+$app->post('/images', function (Request $req, Response $res, $args = [])
 {
-    $data = json_decode($app->request->getBody());
-    if (!isset($data->blob)) {
-        $app->argument_required('Argument "blob" is required');
-        return;
+    $helper = $this->get('helper');
+    $data = $req->getParsedBody();
+    if (!isset($data["blob"])) {
+        return $helper->argument_required($res, 'Argument "blob" is required');
     }
-    $content = base64_decode($data->blob);
+    $content = base64_decode($data["blob"]);
     $digest  = sha1($content);
-    $ch      = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
+    $ch      = curl_init("{$helper->config['blob_url']}guestbook_images/{$digest}");
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
+    //print("INFO");
+    //print_r($info);
     if ($info['http_code'] != 201 && $info['http_code'] != 409) {
-        $app->resource_error($info['http_code'], curl_error($ch));
+        return $helper->resource_error($res, $info['http_code'], curl_error($ch));
     } else {
-        $app->success($info['http_code'], array(
+        return $helper->success($res, $info['http_code'], array(
             'url' => "/image/{$digest}",
             'digest' => $digest
         ));
     }
-})->name('image-post');
+})->setName('image-post');
 
 /**
- * returns the image for a given digest.
+ * Return the image for a given digest.
  */
-$app->get('/image/:digest', function($digest) use ($app)
+$app->get('/image/{digest}', function (Request $req, Response $res, $args = [])
 {
+    $helper = $this->get('helper');
+    $digest = $args["digest"];
     if (empty($digest)) {
-        $app->not_found('Please provide an image digest: /image/<digest>');
-        return;
+        return $helper->not_found($res, 'Please provide an image digest: /image/<digest>');
     }
-    $ch     = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
+    $ch     = curl_init("{$helper->config['blob_url']}guestbook_images/{$digest}");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
     if (!$result || is_bool($result)) {
         $info = curl_getinfo($ch);
-        $app->not_found("Image with digest=\"{$digest}\" not found");
+        return $helper->not_found($res, "Image with digest=\"{$digest}\" not found");
     } else {
-        $app->response->headers->set("Content-Type", "image/gif");
-        $app->response->headers->set("Content-Length", strlen($result));
-        $app->response->setStatus(200);
-        $app->response->write($result);
+        $res->getBody()->write($result);
+        return $res
+            ->withHeader('Content-Type', "image/gif")
+            ->withHeader('Content-Length', strlen($result))
+            ->withStatus(200);
     }
-})->name('image-get');
+})->setName('image-get');
 
 /**
- * deltes a image that is saved in the blobstore with the given digest.
+ * Delete an image that is saved in the blobstore with the given digest.
  */
-$app->delete('/image/:digest', function($digest) use ($app)
+$app->delete('/image/{digest}', function (Request $req, Response $res, $args = [])
 {
+    $helper = $this->get('helper');
+    $digest = $args["digest"];
     if (empty($digest)) {
-        $app->not_found('Please provide an image digest: /image/<digest>');
-        return;
+        return $helper->not_found($res, 'Please provide an image digest: /image/<digest>');
     }
-    $ch = curl_init("{$app->config['blob_url']}guestbook_images/{$digest}");
+    $ch = curl_init("{$helper->config['blob_url']}guestbook_images/{$digest}");
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
     if ($info['http_code'] == 404) {
-        $app->not_found("Image with digest=\"{$digest}\" not found");
+        return $helper->not_found($res, "Image with digest=\"{$digest}\" not found");
     } else if ($info['http_code'] == 204) {
-        $app->response->setStatus(204);
+        return $res->withStatus(204);
     } else {
         $err = curl_error($ch);
-        $app->resource_error(500, "Could not delete image: {$err}");
+        return $helper->resource_error($res, 500, "Could not delete image: {$err}");
     }
-})->name('image-delete');
+})->setName('image-delete');
 
-$app->post('/search', function() use ($app)
+/**
+ * Search for posts.
+ */
+$app->post('/search', function (Request $req, Response $res, $args = [])
 {
-    $data = json_decode($app->request->getBody());
-    if (!isset($data->query_string)) {
-        $app->argument_required('Argument "query_string" is required');
-        return;
+    $helper = $this->get('helper');
+    $data = $req->getParsedBody();
+    if (!isset($data["query_string"])) {
+        return $helper->argument_required($res, 'Argument "query_string" is required');
     }
-    $qry = $app->conn->prepare("SELECT p.*, p._score as _score,
+    $qry = $helper->conn->prepare("SELECT p.*, p._score as _score,
               c.name as country, c.geometry as area
             FROM guestbook.posts AS p, guestbook.countries AS c
             WHERE within(p.\"user\"['location'], c.geometry)
               AND match(p.text, ?)");
-    $qry->bindParam(1, $data->query_string);
+    $qry->bindParam(1, $data["query_string"]);
     $qry->execute();
     $result = $qry->fetchAll(PDO::FETCH_ASSOC);
-    $app->success(200, $result);
-})->name('search');
+    return $helper->success($res, 200, $result);
+})->setName('search');
+
+/**
+ * Enable lazy CORS.
+ * https://www.slimframework.com/docs/v4/cookbook/enable-cors.html
+ */
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
+});
+
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
+/**
+ * Catch-all route to serve a 404 Not Found page if none of the routes match.
+ * NOTE: make sure this route is defined last.
+ */
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function ($request, $response) {
+    throw new HttpNotFoundException($request);
+});
 
 $app->run();
 
