@@ -1,6 +1,10 @@
-# Crate.IO PDO Sample App Explanation
+# CrateDB PDO Sample Application
+
 ## Installation
-The PHP PDO client library for Crate.IO is available on [Packagist](https://packagist.org/packages/crate/crate-pdo) and can be installed by using [Composer](https://getcomposer.org/) or manually by adding a dependency to _composer.json_.
+The PHP PDO client library for CrateDB is available on
+[Packagist](https://packagist.org/packages/crate/crate-pdo) and can be
+installed by using [Composer](https://getcomposer.org/), or by manually
+adding a dependency to your project's `composer.json`.
 
 ### Directly
 Install with Composer:
@@ -35,8 +39,8 @@ After installing the driver, load it automatically by adding this line to the to
 require 'vendor/autoload.php'
 ```
 
-### Connecting to a Crate Cluster
-To connect to a cluster, Crate follows standard PDO syntax to form a data source name string ([dsn](https://en.wikipedia.org/wiki/Data_source_name)) and connect to it.
+### Connecting to a CrateDB Cluster
+To connect to a cluster, CrateDB follows standard PDO syntax to form a data source name string ([dsn](https://en.wikipedia.org/wiki/Data_source_name)) and connect to it.
 
 ```php
 require_once 'vendor/autoload.php';
@@ -45,7 +49,7 @@ $dsn = 'crate:SERVER_IP:4200';
 $conn = new Crate\PDO\PDO($dsn, null, null, null);
 ```
 
-As Crate doesn't support authentication, the other parameters can be left null.
+As CrateDB doesn't support authentication, the other parameters can be left null.
 
 In the PHP example application we read the DSN connection information from the _app.ini_ config file. The PDO connection is set in the constructor of the  `CrateResource` instance which serves the [Slim](http://www.slimframework.com/) web application.
 
@@ -66,7 +70,7 @@ class CrateResource extends \Slim\Slim
 
 ### Executing Statements
 #### Executing Single Statements
-SQL statements can be executed using the `query()` method on the `PDOStatement` object that gets returned when the query is prepared. Each `query()` call results in a new HTTP request to the Crate server. The response of the request (such as `rowCount()`, `columnCount()`, etc.) is written directly to the `PDOStatement` object.
+SQL statements can be executed using the `query()` method on the `PDOStatement` object that gets returned when the query is prepared. Each `query()` call results in a new HTTP request to the CrateDB server. The response of the request (such as `rowCount()`, `columnCount()`, etc.) is written directly to the `PDOStatement` object.
 
 ```php
 $query = $conn->query("SELECT * FROM guestbook.posts");
@@ -100,7 +104,7 @@ There are multiple ways to fetch data from row returning statements (DQL):
 ```php
 $qry = $conn->query("SELECT COUNT(*) FROM sys.nodes");
 $row = $qry->fetch();
-echo "Crate cluster has " . $row[0] . " nodes";
+echo "CrateDB cluster has " . $row[0] . " nodes";
 ```
 
 Our example application uses the data obtained from `fetchall()` and forwards the output directly to the response body. The fetch style argument `PDO::FETCH_ASSOC` ensures that the array is indexed by column name.
@@ -111,9 +115,9 @@ $app->success(200, $result);
 ```
 
 #### Handling BLOBs
-The Crate PDO does not have an implementation or API for handling BLOBs in Crate. So we need to use the [libcurl](http://php.net/manual/de/intro.curl.php) library supported by PHP since version 4.0.2. It's used to upload binaries via HTTP PUT onto a server or host.
+The CrateDB PDO does not have an implementation or API for handling BLOBs in Crate. So we need to use the [libcurl](http://php.net/manual/de/intro.curl.php) library supported by PHP since version 4.0.2. It's used to upload binaries via HTTP PUT onto a server or host.
 
-The sequence for uploading a binary file to a BLOB table on the Crate server is:
+The sequence for uploading a binary file to a BLOB table on the CrateDB server is:
 
 1. Read BLOB content
 2. Compute SHA-1 digest out of BLOB content
@@ -122,7 +126,7 @@ The sequence for uploading a binary file to a BLOB table on the Crate server is:
 5. Execute the session with `cur_exec()`
 6. Finish off the session using `curl_close()`
 
-The following code listing shows an upload via libcurl. The POST endpoint demonstrates how to generate a `sha1` digest from binary file content and how to use it to create the BLOB on a Crate cluster.
+The following code listing shows an upload via libcurl. The POST endpoint demonstrates how to generate a `sha1` digest from binary file content and how to use it to create the BLOB on a CrateDB cluster.
 
 ```php
 $app->post('/images', function() use ($app)
@@ -161,5 +165,5 @@ With Crate's BLOB API it's possible to handle BLOBs within different HTTP reques
 
 For detailed documentation on handling BLOB tables see [BLOB Support](https://crate.io/docs/reference/blob.html).
 
-#### Closing the Connection
-The connection to Crate remains active for the lifetime of the Crate PDO object. To close the connection, the variable that holds the PDO object needs to be assigned NULL. It destroys the object by ensuring that all remaining references to it are deleted.
+#### Closing the connection
+The connection to CrateDB remains active for the lifetime of the CrateDB PDO object. To close the connection, the variable that holds the PDO object needs to be assigned NULL. It destroys the object by ensuring that all remaining references to it are deleted.
