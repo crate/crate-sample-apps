@@ -1,6 +1,6 @@
 {application, 'guestbook',
  [{description, "Guestbook REST API - a Crate sample application using the craterl client"},
-  {vsn, "0.0.1"},
+  {vsn, "0.0.2"},
   {registered, []},
   {mod, {'guestbook_app', []}},
   {applications,
