@@ -1,28 +1,52 @@
-<div>
-  <p class="lead">
-    <b>{{ post.user.name }}</b>
-    wrote on <em>{{ post.created | date:'MMM d, y h:mm a' }}</em>
-  </p>
-  <p ng-if="post.image_ref">
-    <img ng-src="{{ apiHost }}/image/{{ post.image_ref }}" />
-  </p>
-  <p class="lead">{{ post.text }}</p>
-  <p>Location: <span class="label label-info">{{ post.country }}</span></p>
-  <p class="pull-right">
-    <button type="button"
-            class="btn btn-sm btn-primary"
-            ng-click="guestbookCtlr.editPost(post)" disabled>Edit</button>
-    <button type="button"
-            class="btn btn-sm btn-danger"
-            ng-click="guestbookCtlr.deletePost(post)">Delete</button>
-  </p>
-  <p>
-    <button type="button"
-            class="btn btn-sm btn-default"
-            ng-click="guestbookCtlr.likePost(post)">
-      <span class="badge">{{ post.like_count }}</span>
-      <ng-pluralize count="post.like_count"
-                    when="{'0': 'Likes', 'one': 'Like', 'other': 'Likes'}"></ng-pluralize>
-    </button>
-  </p>
-</div>
+      <div class="first post">
+        <div class="w-row">
+
+          <div class="col w-col w-col-3">
+
+            <div class="message-header w-richtext">
+              <p class="lead">
+                <b>{{ post.user.name }}</b>
+                wrote on <em>{{ post.created | date:'MMM d, y h:mm a' }}</em>
+              </p>
+            </div>
+
+            <div class="message-location w-richtext">
+              <p data-new-link="true">Location: {{ post.country }}
+                <br>
+              </p>
+            </div>
+
+          </div>
+
+          <div class="col w-clearfix w-col w-col-9">
+
+            <p ng-if="post.image_ref">
+              <img ng-src="{{ apiHost }}/image/{{ post.image_ref }}" />
+            </p>
+
+            <p class="lead">{{ post.text }}</p>
+
+            <div class="wrapper-post-options">
+              <div class="w-row">
+                <div class="col w-col w-col-5 w-col-small-5 w-col-tiny-5"></div>
+                <div class="align-right col w-col w-col-7 w-col-small-7 w-col-tiny-7">
+                  <a class="but but-options w-inline-block" href="#">
+                    <div class="like-label" ng-click="guestbookCtlr.likePost(post)">
+                    <span class="badge">{{ post.like_count }}</span>
+                    <ng-pluralize count="post.like_count"
+                                  when="{'0': 'Likes', 'one': 'Like', 'other': 'Likes'}"></ng-pluralize>
+                    </div>
+                  </a>
+
+                  <a class="but but-options w-button" ng-click="guestbookCtlr.deletePost(post)" >Delete</a>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+      </div>
