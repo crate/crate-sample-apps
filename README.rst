@@ -38,7 +38,10 @@ commands::
     # Start CrateDB.
     docker run -it --rm \
         --volume=$(pwd)/sql:/sql \
-        --publish=4200:4200 --publish=5432:5432 ${CRATEDB_IMAGE}
+        --publish=4200:4200 --publish=5432:5432 \
+        ${CRATEDB_IMAGE} \
+        -Cdiscovery.type=single-node \
+        -Ccluster.routing.allocation.disk.threshold_enabled=false
 
     # Populate schema and data, and verify it's there.
     docker run --rm --network=host --volume=$(pwd)/sql:/sql ${CRATEDB_IMAGE} sh -c "$(cat <<EOT
