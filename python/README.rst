@@ -1,39 +1,41 @@
+.. highlight: sh
+
 ==================
 Python Backend App
 ==================
 
 This project is community maintained, any contributions are welcome.
 
-A Python backend app using Flask_ and the crate_ Python library, which is an
+A Python backend app using Flask_ and the crate_ Python package, which is an
 implementation of the standard `Python DB API`_ with support for SQLAlchemy_.
 
 Prerequisites
 =============
 
-You will need Python 3 (>3.2) and virtualenv_.
+- You will need Python 3.
 
 Setup
 =====
 
-Set up your environment and install the dependencies like this:
+Set up your environment and install the dependencies::
 
-.. code-block:: sh
-
-    $ virtualenv env
-    $ source ./env/bin/activate
-    $ ./env/bin/pip install -r requirements.txt
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
 
 Run
 ===
 
-You can run the app like so:
+Start the application::
 
-.. code-block:: sh
+    python app.py
 
-    $ ./env/bin/python app.py
+Then, open the application URL::
 
-.. _Flask: http://flask.pocoo.org/
+    open http://localhost:8080/
+
+
+.. _Flask: https://flask.palletsprojects.com/
 .. _crate: https://pypi.python.org/pypi/crate
 .. _Python DB API: https://www.python.org/dev/peps/pep-0249/
-.. _virtualenv: https://virtualenv.readthedocs.org/en/latest/
-.. _SQLAlchemy: http://www.sqlalchemy.org/
+.. _SQLAlchemy: https://www.sqlalchemy.org/
