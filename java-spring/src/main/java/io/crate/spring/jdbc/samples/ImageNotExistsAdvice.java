@@ -17,7 +17,7 @@ public class ImageNotExistsAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     Map<String, Object> imageNotFoundHandler(ImageNotExistsException ex) {
         var responseMap = new HashMap<String, Object>();
-        responseMap.put("status", HttpStatus.NOT_FOUND);
+        responseMap.put("status", HttpStatus.NOT_FOUND.value());
         responseMap.put("error", ex.getMessage());
         return responseMap;
     }

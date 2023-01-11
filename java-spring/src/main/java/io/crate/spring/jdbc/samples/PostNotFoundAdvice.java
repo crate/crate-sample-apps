@@ -15,6 +15,6 @@ public class PostNotFoundAdvice {
     @ExceptionHandler(PostNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     Map<String, Object> postNotFoundHandler(PostNotFoundException ex) {
-        return Map.of("status", HttpStatus.NOT_FOUND, "error", ex.getMessage());
+        return Map.of("status", HttpStatus.NOT_FOUND.value(), "error", ex.getMessage());
     }
 }
