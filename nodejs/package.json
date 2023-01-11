@@ -1,10 +1,11 @@
 {
   "name": "nodejs",
   "version": "1.0.0",
-  "description": "Node.js example app for CrateDB",
+  "description": "Node.js example application for CrateDB",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon server.js --verbose",
+    "debug": "DEBUG=express:* nodemon server.js --verbose",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -14,6 +15,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "node-crate": "^2.0.4",
+    "nodemon": "1.*",
     "request": "^2.85.0",
     "sha1": "^1.1.1",
     "uniqid": "^4.1.1"
