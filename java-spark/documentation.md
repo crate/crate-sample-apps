@@ -233,7 +233,7 @@ If a blob does not exist an HTTP status code 404 Not Found is returned.
 [2]: https://crate.io/docs/reference/en/latest/protocols/postgres.html
 [3]: https://crate.io/docs/reference/jdbc/en/latest/
 [4]: https://crate.io/docs/clients/jdbc/
-[5]: https://bintray.com/crate/crate/crate-jdbc/view
+[5]: https://mvnrepository.com/artifact/io.crate/crate-jdbc/latest
 [6]: https://crate.io/docs/reference/jdbc/en/latest/#jdbc-url-format
 [7]: https://crate.io/docs/reference/blob.html
 [8]: https://hc.apache.org/httpcomponents-client-ga
