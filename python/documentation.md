@@ -1,20 +1,21 @@
-# Crate.IO Python Sample App Explanation
+# CrateDB Python Flask Sample Application
+
 ## Installation
-The Python client library for Crate is available on [PyPi](https://pypi.python.org/pypi/crate) and can be installed using `pip`.
+The Python client library for CrateDB is available on [PyPi](https://pypi.python.org/pypi/crate) and can be installed using `pip`.
 
 ```bash
 pip install crate
 ```
 
-The package `crate` contains both the Python Database API implementation and the Crate dialect for SQLAlchemy.
+The package `crate` contains both the Python Database API implementation and the CrateDB dialect for SQLAlchemy.
 
-In this example we only cover the usage of the Crate client.
+In this example we only cover the usage of the CrateDB client.
 
 ## Usage
-### Connecting to a Crate Cluster
-It's simple to connect to a single Crate node or cluster.
+### Connecting to a CrateDB Cluster
+It's simple to connect to a single CrateDB node or cluster.
 
-Import the `connect` method from the `crate.client` module and provide the `<host>:<port>` of a single Crate instance or a list to connect to. The port is the `HTTP` port (default `4200`) of the Crate node.
+Import the `connect` method from the `crate.client` module and provide the `<host>:<port>` of a single CrateDB instance or a list to connect to. The port is the `HTTP` port (default `4200`) of the CrateDB node.
 
 ```python
 from crate.client import connect
@@ -43,11 +44,11 @@ class CrateResource(Resource):
         return app_globals.conn
 ```
 
-To get a traceback from Crate in case of something wrong, we set the `error_trace` argument to `True`.
+To get a traceback from CrateDB in case of something wrong, we set the `error_trace` argument to `True`.
 
 ### Executing Statements
 #### Executing a Single Statement
-SQL statements can be executed using the `execute()` method on the cursor. Each `execute()` call results in a new HTTP request to the Crate Cluster. The response of the request (such as `rowcount`, `duration`, etc.) is written directly to the executing cursor object.
+SQL statements can be executed using the `execute()` method on the cursor. Each `execute()` call results in a new HTTP request to the CrateDB Cluster. The response of the request (such as `rowcount`, `duration`, etc.) is written directly to the executing cursor object.
 
 ```python
 cursor.execute("""
@@ -155,9 +156,9 @@ class PostList(PostResource):
 ```
 
 ### Handling BLOBs
-The Crate Python client library also contains an API for handling BLOBs.
+The CrateDB Python client library also contains an API for handling BLOBs.
 
-A blob container is an easy to use wrapper around the BLOB API of the Crate Cluster. It can be obtained from the `CrateConnection` object via the `get_blob_container()` method.
+A blob container is an easy to use wrapper around the BLOB API of the CrateDB Cluster. It can be obtained from the `CrateConnection` object via the `get_blob_container()` method.
 
 ```python
 container = connection.get_blob_container('my_blobs')
@@ -187,7 +188,7 @@ The blob container provides various methods to handle blobs:
 - `get()`: To retrieve a blob
 - `delete()`: To remove a blob from the database
 
-The `post()` method on the `ImageList` class demonstrates how to generate a `sha1` digest from a JSON payload that contains a base64 encoded binary file and how to use it to create the blob on the Crate cluster.
+The `post()` method on the `ImageList` class demonstrates how to generate a `sha1` digest from a JSON payload that contains a base64 encoded binary file and how to use it to create the blob on the CrateDB cluster.
 
 ```python
 class ImageList(ImageResource):
@@ -204,7 +205,7 @@ class ImageList(ImageResource):
         ...
 ```
 
-For detailed documentation of all blob container methods see [Crate Python Blob API](http://crate-python.readthedocs.org/en/latest/blobs.html).
+For detailed documentation of all blob container methods see [CrateDB Python Blob API](https://crate.io/docs/python/en/latest/blobs.html).
 
 ### Closing the Connection
 Both the connection and the cursor can be closed on demand, rather then whenever `.__del__()` is called. Cursors and connections that have been closed cannot be used any more and will raise an error if any operation is attempted.
