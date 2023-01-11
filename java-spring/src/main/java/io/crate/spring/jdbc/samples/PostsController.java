@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +46,7 @@ public class PostsController {
     }
 
     @PostMapping("/posts")
-    public List<Map<String, Object>> insertPost(@RequestBody Map<String, Object> postProps) {
+    public List<Map<String, Object>> insertPost(@RequestBody Map<String, Object> postProps, HttpServletResponse response) {
         logger.debug("Inserting post in database");
 
         if (postProps == null) {
@@ -58,7 +61,7 @@ public class PostsController {
         }
 
         var newPost = dao.insertPost(postsDeserializer.fromMap(postProps)).orElseThrow(() -> new PostNotFoundException("new from insert"));
-
+        response.setStatus(HttpStatus.CREATED.value());
         return List.of(postsSerializer.serialize(newPost));
     }
 
@@ -90,11 +93,12 @@ public class PostsController {
     }
 
     @DeleteMapping("/post/{id}")
-    public void deletePost(@PathVariable String id) {
+    public void deletePost(@PathVariable String id, HttpServletResponse response) {
         logger.debug("Deleting post with id '" + id + "' in database");
         if (!dao.deletePost(id)) {
             throw new PostNotFoundException(id);
         }
+        response.setStatus(HttpStatus.NO_CONTENT.value());
     }
 
     @PostMapping("/search")

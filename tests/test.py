@@ -135,8 +135,14 @@ class CrateTestCase(unittest.TestCase):
     def assertArgumentRequired(self, res, code, a):
         d = json.loads(res)
         self.assertEqual(code, 400)
-        self.assertRegex(d['error'], "is required")
         self.assertEqual(d['status'], 400)
+        # Special handling for `java-spring`. The framework will reject the request
+        # before the function entry-point, so all we can expect is a generic error
+        # message here.
+        if d['error'] == "Bad Request":
+            self.assertRegex(d['message'], "Required request body is missing")
+        else:
+            self.assertRegex(d['error'], "is required")
 
 
 class PostsTestCase(CrateTestCase):

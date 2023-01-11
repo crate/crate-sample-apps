@@ -15,7 +15,7 @@ public class ArgumentRequiredAdvice {
     @ExceptionHandler(ArgumentRequiredException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     Map<String, Object> postNotFoundHandler(ArgumentRequiredException ex) {
-        return Map.of("status", HttpStatus.BAD_REQUEST, "error", ex.getMessage());
+        return Map.of("status", HttpStatus.BAD_REQUEST.value(), "error", ex.getMessage());
     }
 
 }
