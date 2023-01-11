@@ -1,7 +1,4 @@
 .idea
 python/env
-php/vendor/
-php/composer.phar
-php/composer.lock
 nodejs/package-lock.json
 nodejs/node_modules
