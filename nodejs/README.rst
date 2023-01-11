@@ -1,8 +1,10 @@
+.. highlight:: sh
+
 ===================
 Node.js Backend App
 ===================
 
-A Node.js backend app using express_ and node-crate_.
+A Node.js backend app using `express`_ and `node-crate`_.
 
 Prerequisites
 =============
@@ -13,24 +15,24 @@ Prerequisites
 Setup
 =====
 
-Install dependencies:
+Install dependencies::
 
-.. code-block:: sh
-
-    $ cd nodejs
-    $ npm install
+    cd nodejs
+    npm install
 
 Run
 ===
 
-You can run the app like so:
+Run the application::
 
-.. code-block:: sh
+    npm start
 
-    $ npm start
+Open the URL to the application::
+
+    open http://localhost:8080
 
 
-.. _Nodejs: https://nodejs.org/en/
-.. _npm: https://www.npmjs.com/get-npm
 .. _express: https://www.npmjs.com/package/express
 .. _node-crate: https://www.npmjs.com/package/node-crate
+.. _Nodejs: https://nodejs.org/en/
+.. _npm: https://www.npmjs.com/get-npm
