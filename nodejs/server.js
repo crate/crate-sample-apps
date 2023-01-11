@@ -42,25 +42,35 @@ app.get('/post/:id', (req, response) => {
                 + "FROM guestbook.posts AS p, guestbook.countries AS c "
                 + "WHERE within(p.\"user\"['location'], c.geometry) "
                 + "AND p.id = ?", [req.params.id]).then((res) => {
-    response.status(200).json(res.json[0]);
+    if (res.json && res.json.length) {
+      response.status(200).json(res.json[0]);
+    } else {
+      response.status(404).json({
+        error: `Post with id=\"${req.params.id}\" not found`,
+        status: 404,
+      });
+    }
   });
 });
 
 // Insert new post
 app.post('/posts', (req, response) => {
   if (!req.body) {
-    return response.json({
-      message: 'Please pass a body to the request',
+    return response.status(400).json({
+      error: 'Please pass a body to the request',
+      status: 400,
     });
   }
-  if (!req.body.user.name) {
-    return response.json({
-      message: 'Please insert a name',
+  if (!req.body.user || !req.body.user.name) {
+    return response.status(400).json({
+      error: 'Argument "name" is required',
+      status: 400,
     });
   }
   if (!req.body.user.location || req.body.user.location.length === 0) {
-    return response.json({
-      message: 'Please insert a location',
+    return response.status(400).json({
+      error: 'Argument "location" is required',
+      status: 400,
     });
   }
   let id = uniqid();
@@ -74,8 +84,9 @@ app.post('/posts', (req, response) => {
     0
   ]).then((res) => {
     if (res.rowcount === 0) {
-      return response.json({
-        message: 'DB error',
+      return response.status(500).json({
+        error: 'DB error',
+        status: 500,
       });
     }
     crate.execute("REFRESH TABLE guestbook.posts").then(() => {
@@ -83,7 +94,7 @@ app.post('/posts', (req, response) => {
                     + "FROM guestbook.posts AS p, guestbook.countries AS c "
                     + "WHERE within(p.\"user\"['location'], c.geometry) "
                     + "AND p.id = ?", [id]).then((res) => {
-        response.status(200).json(res.json);
+        response.status(201).json(res.json);
       });
     });
   });
@@ -92,20 +103,23 @@ app.post('/posts', (req, response) => {
 // Change the text of a post
 app.put('/post/:id', (req, response) => {
   if (!req.body) {
-    return response.json({
-      message: 'Please pass a body to the req',
+    return response.status(400).json({
+      error: 'Please pass a body to the req',
+      status: 400,
     });
   }
   if (!req.body.text) {
-    return response.json({
-      message: 'Argument "text" is required',
+    return response.status(400).json({
+      error: 'Argument "text" is required',
+      status: 400,
     });
   }
   crate.execute("UPDATE guestbook.posts SET text=? WHERE id=?",
     [req.body.text, req.params.id]).then((res) => {
     if (res.rowcount === 0) {
       return response.status(404).json({
-        message: 'Post not found'
+        error: `Post with id="${req.params.id}" not found`,
+        status: 404,
       });
     }
     crate.execute("REFRESH TABLE guestbook.posts").then(() => {
@@ -113,7 +127,8 @@ app.put('/post/:id', (req, response) => {
                     + "FROM guestbook.posts AS p, guestbook.countries AS c "
                     + "WHERE within(p.\"user\"['location'], c.geometry) "
                     + "AND p.id = ?", [req.params.id]).then((res) => {
-        response.status(200).json(res.json);
+        console.log("RESULT:", res.json);
+        return response.status(200).json(res.json[0]);
       });
     });
   });
@@ -125,14 +140,16 @@ app.put('/post/:id/like', (req, response) => {
     [req.params.id]).then((res) => {
     if (res.rowcount === 0) {
       return response.status(404).json({
-        message: 'Post not found'
+        error: `Post with id="${req.params.id}" not found`,
+        status: 404,
       });
     }
     crate.execute("UPDATE guestbook.posts SET like_count = like_count + 1 "
                   + "WHERE id=?", [req.params.id]).then((res) => {
       if (res.rowcount === 0) {
         return response.status(500).json({
-          message: 'Update statement went wrong'
+          error: 'Update statement went wrong',
+          status: 500,
         });
       }
       crate.execute("REFRESH TABLE guestbook.posts").then(() => {
@@ -140,7 +157,7 @@ app.put('/post/:id/like', (req, response) => {
                       + "FROM guestbook.posts AS p, guestbook.countries AS c "
                       + "WHERE within(p.\"user\"['location'], c.geometry) "
                       + "AND p.id = ?", [req.params.id]).then((res) => {
-          response.status(200).json(res.json[0]);
+          return response.status(200).json(res.json[0]);
         });
       });
     });
@@ -153,13 +170,15 @@ app.delete('/post/:id', (req, response) => {
     [req.params.id]).then((res) => {
     if (res.rowcount === 0) {
       return response.status(404).json({
-        message: 'Post not found'
+        error: `Post with id="${req.params.id}" not found`,
+        status: 404,
       });
     }
     crate.execute('DELETE FROM guestbook.posts WHERE id=?',
       [req.params.id]).then((res2) => {
-      response.status(200).json({
-        message: 'Post deleted'
+      return response.status(204).json({
+        message: 'Post deleted successfully',
+        status: 204,
       });
     });
   });
@@ -182,15 +201,16 @@ app.get('/image/:digest', (req, response) => {
     encoding: null
   }, (error, res, body) => {
     if (body.length === 0) {
-      return response.json({
-        message: 'Digest not found',
+      return response.status(404).json({
+        error: `Image with digest="${req.params.digest}" not found`,
+        status: 404,
       });
     }
     response.writeHead(200, {
         'Content-Type': 'image/gif',
         'Content-Length': body.length
     });
-    response.end(new Buffer(body));
+    response.end(new Buffer.from(body));
   });
 });
 
@@ -203,12 +223,19 @@ app.delete('/image/:digest', (req, response) => {
     method: 'DELETE'
   }, (error, res, body) => {
     if (res.statusCode === 204) {
-      response.json({
-        message: 'Image deleted successfully',
+      response.status(204).json({
+        error: 'Image deleted',
+        status: 204,
+      });
+    } else if (res.statusCode === 404) {
+      response.status(404).json({
+        error: `Image with digest="${req.params.digest}" not found`,
+        status: 404,
       });
     } else {
-      return response.status(500).json({
-        message: 'Image deleted successfully',
+      response.status(500).json({
+        error: 'Image deletion failed',
+        status: 500,
       });
     }
   });
@@ -216,9 +243,10 @@ app.delete('/image/:digest', (req, response) => {
 
 // Upload image
 app.post('/images', (req, response) => {
-  if (!req.body.blob) {
-    response.status(400).json({
-      message: 'Argument "blob" is required'
+  if (!req.body.blob || req.body.blob === undefined) {
+    return response.status(400).json({
+      error: 'Argument "blob" is required',
+      status: 400,
     });
   }
 
@@ -236,14 +264,15 @@ app.post('/images', (req, response) => {
     body: data
   }, (error, res, body) => {
     if (res.statusCode === 201 || res.statusCode === 409) {
-      response.status(201).json({
+      response.status(res.statusCode).json({
         url: '/image/' + digest,
         digest: digest
       });
     } else {
       console.log(error);
       response.status(500).json({
-        message: 'Something went wrong with the upload'
+        error: 'Something went wrong with the upload',
+        status: 500,
       });
     }
   });
@@ -253,7 +282,8 @@ app.post('/images', (req, response) => {
 app.post('/search', (req, response) => {
   if (req.body.query_string === "" || !req.body.query_string) {
     return response.status(404).json({
-      message: 'Argument "query_string" is required'
+      error: 'Argument "query_string" is required',
+      status: 404,
     });
   }
   crate.execute("SELECT p.*, p._score as _score, c.name as country, c.geometry "
@@ -264,3 +294,11 @@ app.post('/search', (req, response) => {
     response.status(200).json(res.json);
   });
 });
+
+// 404 Not Found
+app.use((req, response, next) => {
+  response.status(404).json({
+    error: "Sorry can't find that!",
+    status: 404,
+  });
+})
