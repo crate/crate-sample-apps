@@ -1,30 +1,29 @@
+.. highlight:: sh
+
 ===========
 PHP Backend
 ===========
 
-A PHP backend app using crate-pdo_.
+A PHP backend app using `crate-pdo`_.
 
 Prerequisites
 =============
 
-Install the app dependencies with Composer_:
+Install the app dependencies with `Composer`_::
 
-.. code-block:: sh
-
-    $ composer install
+    composer install
 
 Run
 ===
 
-You can run the app like so:
+Run the application::
 
-.. code-block:: sh
+    php -S localhost:8080
 
-    $ php -S localhost:8080
+Then, open the application URL:
 
-Then, open the app:
+    open http://localhost:8080/
 
-    http://localhost:8080/
 
 .. _Composer: https://getcomposer.org/
 .. _crate-pdo: https://github.com/crate/crate-pdo
