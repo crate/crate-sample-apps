@@ -126,7 +126,7 @@ $app->get('/post/{id}', function (Request $req, Response $res, $args = [])
  */
 $app->post('/posts', function (Request $req, Response $res, $args = [])
 {
-    $helper = $this->get('helper');
+    $helper    = $this->get('helper');
     $data      = $req->getParsedBody();
     $user      = $data["user"];
     $text      = $data["text"];
@@ -313,8 +313,6 @@ $app->post('/images', function (Request $req, Response $res, $args = [])
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $result = curl_exec($ch);
     $info   = curl_getinfo($ch);
-    //print("INFO");
-    //print_r($info);
     if ($info['http_code'] != 201 && $info['http_code'] != 409) {
         return $helper->resource_error($res, $info['http_code'], curl_error($ch));
     } else {
