@@ -1,20 +1,19 @@
 # CrateDB PDO Sample Application
 
 ## Installation
-The PHP PDO client library for CrateDB is available on
-[Packagist](https://packagist.org/packages/crate/crate-pdo) and can be
-installed by using [Composer](https://getcomposer.org/), or by manually
-adding a dependency to your project's `composer.json`.
+The PHP PDO client library for CrateDB is available as [crate-pdo on
+Packagist], and can be installed by using [Composer], or by manually
+adding it as a dependency to your project's `composer.json`.
 
 ### Directly
 Install with Composer:
 
 ```bash
-composer require crate/crate-pdo:~0.3.0
+composer require crate/crate-pdo:2.*
 ```
 
 ### Manually
-Add the following dependency to _composer.json_:
+Add the following dependency to `composer.json`:
 
 ```json
 {
@@ -30,7 +29,7 @@ And install the driver with:
 composer install
 ```
 
-Composer will install the library and its dependencies into _./vendor/_.
+Composer will install the library and its dependencies into the `./vendor/` directory.
 
 ## Usage
 After installing the driver, load it automatically by adding this line to the top of the php file.
@@ -40,7 +39,10 @@ require 'vendor/autoload.php'
 ```
 
 ### Connecting to a CrateDB Cluster
-To connect to a cluster, CrateDB follows standard PDO syntax to form a data source name string ([dsn](https://en.wikipedia.org/wiki/Data_source_name)) and connect to it.
+To connect to a cluster, CrateDB follows the standard PDO constructor interface
+`PDO($dsn, $user, $password, $options)` and its syntax to form a data source name
+string ([dsn]). See also the documentation about [authenticating with CrateDB PDO]
+for more details.
 
 ```php
 require_once 'vendor/autoload.php';
@@ -49,9 +51,10 @@ $dsn = 'crate:SERVER_IP:4200';
 $conn = new Crate\PDO\PDO($dsn, null, null, null);
 ```
 
-As CrateDB doesn't support authentication, the other parameters can be left null.
-
-In the PHP example application we read the DSN connection information from the _app.ini_ config file. The PDO connection is set in the constructor of the  `CrateResource` instance which serves the [Slim](http://www.slimframework.com/) web application.
+In the PHP example application, we read the DSN connection information from the
+`app.ini` configuration file. The PDO connection is set in the constructor of
+the  `CrateResource` instance, which serves the web application based on the
+[Slim] web framework.
 
 ```php
 class CrateResource extends \Slim\Slim
@@ -70,14 +73,21 @@ class CrateResource extends \Slim\Slim
 
 ### Executing Statements
 #### Executing Single Statements
-SQL statements can be executed using the `query()` method on the `PDOStatement` object that gets returned when the query is prepared. Each `query()` call results in a new HTTP request to the CrateDB server. The response of the request (such as `rowCount()`, `columnCount()`, etc.) is written directly to the `PDOStatement` object.
+SQL statements can be executed using the `query()` method on the [PDOStatement]
+object that gets returned when the query is prepared. Each `query()` call
+will run a HTTP request to the CrateDB server. The response of the request
+(such as `rowCount()`, `columnCount()`, etc.) is written directly to the
+[PDOStatement] object instance.
 
 ```php
 $query = $conn->query("SELECT * FROM guestbook.posts");
 echo "table guestbook.posts counts " . $query->rowCount() . " row(s)";
 ```
 
-To perform parameter substitution the method `bindParam()` ensures that the parameters bind correctly to their assigned values. Afterwards execute the query using the `execute()` method on the variable that holds the prepared statement object.
+To perform parameter substitution the method `bindParam()` ensures that the
+parameters bind correctly to their assigned values. Afterwards execute the
+query using the `execute()` method on the variable that holds the prepared
+statement object.
 
 ```php
 $qry = $app->conn->prepare("
@@ -93,13 +103,16 @@ $qry->bindParam(6, $likeCount);
 $state = $qry->execute();
 ```
 
-For a prepared statement using named placeholders, the first argument is the parameter name in the form `:name`. For a prepared statement using question mark placeholders, this will be the **1-indexed** position of the parameter
+- For a prepared statement using named placeholders, the first argument is the
+  parameter name in the form `:name`.
+- For a prepared statement using question mark placeholders, this will be the
+  **1-indexed** position of the parameter.
 
 #### Fetching Query Results
 There are multiple ways to fetch data from row returning statements (DQL):
 
-- `fetch()`: Fetches the next row from a result set (see [PDOStatement::fetch](http://php.net/manual/de/pdostatement.fetch.php))
-- `fetchall()`: Returns an array containing all the result set rows (see [PDOStatement::fetchall](http://php.net/manual/de/pdostatement.fetchall.php))
+- `fetch()`: Fetches the next row from a result set, see [PDOStatement::fetch].
+- `fetchall()`: Returns an array containing all the result set rows, see [PDOStatement::fetchall].
 
 ```php
 $qry = $conn->query("SELECT COUNT(*) FROM sys.nodes");
@@ -115,9 +128,11 @@ $app->success(200, $result);
 ```
 
 #### Handling BLOBs
-The CrateDB PDO does not have an implementation or API for handling BLOBs in Crate. So we need to use the [libcurl](http://php.net/manual/de/intro.curl.php) library supported by PHP since version 4.0.2. It's used to upload binaries via HTTP PUT onto a server or host.
+The CrateDB PDO does not have an implementation or API for handling BLOBs in
+CrateDB. So we need to use the [libcurl] library supported by PHP since
+version 4.0.2. It is used to upload files via HTTP PUT onto a server or host.
 
-The sequence for uploading a binary file to a BLOB table on the CrateDB server is:
+The sequence for uploading a file to a BLOB table on the CrateDB server is:
 
 1. Read BLOB content
 2. Compute SHA-1 digest out of BLOB content
@@ -126,7 +141,9 @@ The sequence for uploading a binary file to a BLOB table on the CrateDB server i
 5. Execute the session with `cur_exec()`
 6. Finish off the session using `curl_close()`
 
-The following code listing shows an upload via libcurl. The POST endpoint demonstrates how to generate a `sha1` digest from binary file content and how to use it to create the BLOB on a CrateDB cluster.
+The following PHP code demonstrates the corresponding procedure. The POST
+endpoint demonstrates how to generate a `sha1` digest from binary file content
+and how to use it to create the BLOB on a CrateDB cluster.
 
 ```php
 $app->post('/images', function() use ($app)
@@ -158,12 +175,28 @@ $app->post('/images', function() use ($app)
 })->name('image-post');
 ```
 
-With Crate's BLOB API it's possible to handle BLOBs within different HTTP request methods on the _{HOST}/_blobs/{digest}_ endpoint:
+With CrateDB's BLOB API, it is possible to handle BLOBs within different HTTP
+request methods on the `{HOST}/_blobs/{digest}` endpoint:
 
 - `PUT` to create/upload blobs
 - `DELETE` to remove a blob from the database
 
-For detailed documentation on handling BLOB tables see [BLOB Support](https://crate.io/docs/reference/blob.html).
+For detailed documentation on handling BLOB tables, see [BLOB support].
 
 #### Closing the connection
-The connection to CrateDB remains active for the lifetime of the CrateDB PDO object. To close the connection, the variable that holds the PDO object needs to be assigned NULL. It destroys the object by ensuring that all remaining references to it are deleted.
+The connection to CrateDB remains active for the lifetime of the CrateDB PDO
+object. To close the connection, the variable that holds the PDO object needs
+to be assigned `NULL`. It destroys the object by ensuring that all remaining
+references to it are deleted.
+
+
+[authenticating with CrateDB PDO]: https://crate.io/docs/pdo/en/latest/connect.html#get-a-connection
+[BLOB support]: https://crate.io/docs/reference/blob.html
+[Composer]: https://getcomposer.org/
+[crate-pdo on Packagist]: https://packagist.org/packages/crate/crate-pdo
+[dsn]: https://en.wikipedia.org/wiki/Data_source_name
+[libcurl]: https://www.php.net/manual/en/intro.curl.php
+[PDOStatement]: https://www.php.net/manual/en/class.pdostatement.php
+[PDOStatement::fetch]: https://www.php.net/manual/en/pdostatement.fetch.php
+[PDOStatement::fetchall]: https://www.php.net/manual/en/pdostatement.fetchall.php
+[Slim]: https://www.slimframework.com/
