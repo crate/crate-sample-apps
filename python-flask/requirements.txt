@@ -1,8 +1,0 @@
-crash
-crate
-flask<3
-flask-restful<1
-flask-cors<4
-itsdangerous<3
-jinja2<4
-markupsafe<2

@@ -1,17 +1,18 @@
 .. highlight:: sh
 
-===============
+###############
 Developer guide
-===============
+###############
 
 
+*****
 About
-=====
+*****
 
 This section of the documentation describes the API specification document, the
-corresponding test cases, and outlines how to provision a CrateDB sandbox
-environment using Docker.
-
+corresponding test cases, and walks you through the process of provisioning a
+CrateDB sandbox environment using Docker, and running the scenario on behalf
+of the Python backend application, as an example.
 
 API specification
 =================
@@ -21,14 +22,10 @@ within the `Backend API specification for the CrateDB guestbook demo application
 document.
 
 
-Integration tests
-=================
 
-You can use a set of test cases to validate a backend application for
-compatibility with the specification. To invoke those integration tests, run::
-
-    cd tests
-    python3 test.py --host localhost --port 8080
+***********
+Walkthrough
+***********
 
 
 Docker setup
@@ -60,8 +57,49 @@ commands to run and provision your database instance::
     EOT)"
 
 
+Backend application
+===================
+
+In order to invoke the Python backend application, run those commands::
+
+    cd python-flask
+    pip3 install poethepoet
+    poe install
+    poe run
+
+You can introspect the HTTP API in different ways::
+
+    open http://localhost:8080/
+    curl http://localhost:8080/images
+    http http://localhost:8080/posts
+
+
+Frontend application
+====================
+
+In order to serve the JavaScript frontend application, run those commands::
+
+    cd frontend
+    python3 -m http.server
+
+Then, navigate to the UI::
+
+    open http://localhost:8000/index.html
+
+
+Integration tests
+=================
+
+You can use a set of test cases to validate a backend application for
+compatibility with the specification. To invoke those integration tests, run::
+
+    cd tests
+    python3 test.py --host localhost --port 8080
+
+
+***********
 Development
-===========
+***********
 
 You can submit HTTP requests from the console to the backend service,
 for example by using the excellent `HTTPie`_ program::

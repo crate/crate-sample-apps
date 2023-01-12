@@ -1,8 +1,8 @@
 .. highlight: sh
 
-==================
-Python Backend App
-==================
+====================================================================
+Backend API implementation of the CrateDB guestbook demo application
+====================================================================
 
 This project is community maintained, any contributions are welcome.
 
@@ -19,16 +19,15 @@ Setup
 
 Set up your environment and install the dependencies::
 
-    python3 -m venv .venv
-    source .venv/bin/activate
-    pip install -r requirements.txt
+    pip3 install poethepoet
+    poe install
 
 Run
 ===
 
 Start the application::
 
-    python app.py
+    poe run
 
 Then, open the application URL::
 
