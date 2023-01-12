@@ -1,14 +1,19 @@
 .. highlight:: sh
 
-===================
-CrateDB Sample Apps
-===================
+===================================
+CrateDB guestbook demo applications
+===================================
 
-Overview
-========
+About
+=====
 
-A JavaScript guestbook app with a number of different backend implementations,
-each using a different `client library`_ to communicate with CrateDB_.
+A gallery of applications, each implementing the same HTTP API for a guestbook
+backend, using SQL and CrateDB. Each implementation uses a different `client
+library`_ to communicate with CrateDB_.
+
+Accompanied with the applications, there is a dedicated test suite to verify
+the corresponding implementation automatically, and a guestbook frontend
+application for interactively communicating with the backend service.
 
 Prerequisites
 =============
@@ -28,30 +33,8 @@ country data::
     crash < sql/schemas.sql
     crash -c "COPY guestbook.countries FROM '$(pwd)/sql/countries.json' RETURN SUMMARY;"
 
-If you choose to use Docker for running CrateDB on your workstation, use those
-commands::
-
-    # Define CrateDB version.
-    export CRATEDB_VERSION=latest
-    export CRATEDB_IMAGE=crate:${CRATEDB_VERSION}
-
-    # Start CrateDB.
-    docker run -it --rm \
-        --volume=$(pwd)/sql:/sql \
-        --publish=4200:4200 --publish=5432:5432 \
-        ${CRATEDB_IMAGE} \
-        -Cdiscovery.type=single-node \
-        -Ccluster.routing.allocation.disk.threshold_enabled=false
-
-    # Populate schema and data, and verify it's there.
-    docker run --rm --network=host --volume=$(pwd)/sql:/sql ${CRATEDB_IMAGE} sh -c "$(cat <<EOT
-        crash < /sql/schemas.sql;
-        crash <<SQL
-            COPY guestbook.countries FROM 'file:///sql/countries.json' RETURN SUMMARY;
-            REFRESH TABLE guestbook.countries;
-            SELECT id, name FROM guestbook.countries LIMIT 10;
-    SQL
-    EOT)"
+Please note that the ``countries.json`` file needs to be accessible by CrateDB.
+See the `developer docs`_ about how to run and provision CrateDB using Docker.
 
 
 Components
@@ -68,24 +51,21 @@ Backends
 
 The are several implementations of the backend REST API.
 
-- Python_ (using dbapi_, crate-python_)
-- PHP_ (using PDO_, crate-pdo_)
+- `Erlang (Cowboy)`_ (using Erlang_, craterl_)
+- `Go (Gin)`_ (using Go_, Gin_, pgx_, pgxscan_)
 - `Java (Spark)`_ (using Spark_, JDBC_, `CrateDB JDBC driver`_)
 - `Java (Spring)`_ (using  `Spring Boot`_, `Spring Data JDBC`_, `CrateDB JDBC driver`_)
-- Erlang_ (using Erlang_, craterl_)
-
-You can submit HTTP requests from the console to the backend service,
-for example by using the excellent `HTTPie`_ program::
-
-    http localhost:8080/posts user:='{"name": "John Doe", "location": [9.744417, 47.413417]}' text="Hello, world." --print HhBb
+- `Node.js (Express)`_ (using  `Node.js`_, Express_, `node-crate`_)
+- `PHP (Slim)`_ (using PHP_, Slim_, PDO_, `crate-pdo`_)
+- `Python (Flask)`_ (using Python_, Flask_, DBAPI2_, `crate-python`_)
 
 
 Contributing
 ============
 
-This project is community maintained, any contributions are welcome.
-
-See the `developer docs`_ and the `contribution docs`_ for more information.
+This project is community-maintained, any contributions are welcome.
+See the `developer docs`_, `api specification`_, and the `contribution docs`_
+documents for more information.
 
 Help
 ====
@@ -94,6 +74,8 @@ Looking for more help?
 
 - Check out our `support channels`_
 
+
+.. _api specification: SPEC.md
 .. _client library: https://crate.io/docs/clients/
 .. _contribution docs: CONTRIBUTING.rst
 .. _crash: https://github.com/crate/crash
@@ -103,20 +85,34 @@ Looking for more help?
 .. _CrateDB: https://github.com/crate/crate
 .. _CrateDB JDBC driver: https://crate.io/docs/clients/jdbc/
 .. _craterl: https://github.com/crate/craterl
-.. _dbapi: https://www.python.org/dev/peps/pep-0249/
+.. _DBAPI2: https://www.python.org/dev/peps/pep-0249/
 .. _developer docs: DEVELOP.rst
-.. _Erlang: erlang-cowboy
+.. _Erlang: https://www.erlang.org/
+.. _Erlang (Cowboy): erlang-cowboy
+.. _Express: https://expressjs.com/
+.. _Flask: https://flask.palletsprojects.com/
 .. _frontend: frontend
 .. _Getting Started: https://crate.io/docs/getting-started/
+.. _Gin: https://github.com/gin-gonic/gin
+.. _Go: https://go.dev/
+.. _Go (Gin): go-gin
 .. _HTTPie: https://httpie.io/
 .. _Java (Spark): java-spark
 .. _Java (Spring): java-spring
 .. _JDBC: https://docs.oracle.com/javase/tutorial/jdbc/
+.. _Node.js: https://nodejs.org/
+.. _Node.js (Express): nodejs-express
+.. _node-crate: https://www.npmjs.com/package/node-crate
 .. _PDO: https://www.php.net/manual/en/book.pdo.php
 .. _pgjdbc: https://github.com/pgjdbc/pgjdbc
-.. _PHP: php-slim
-.. _Python: python-flask
-.. _REST API: https://crate.io/docs/clients/rest/
+.. _PHP: https://www.php.net/
+.. _PHP (Slim): php-slim
+.. _pgx: https://github.com/jackc/pgx
+.. _pgxscan: https://github.com/georgysavva/scany
+.. _Python: https://www.python.org/
+.. _Python (Flask): python-flask
+.. _REST API: https://en.wikipedia.org/wiki/Representational_state_transfer
+.. _Slim: https://www.slimframework.com/
 .. _Spark: https://sparkjava.com/
 .. _Spring Boot: https://spring.io/projects/spring-boot
 .. _Spring Data JDBC: https://spring.io/projects/spring-data-jdbc
