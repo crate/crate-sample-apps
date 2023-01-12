@@ -127,7 +127,6 @@ app.put('/post/:id', (req, response) => {
                     + "FROM guestbook.posts AS p, guestbook.countries AS c "
                     + "WHERE within(p.\"user\"['location'], c.geometry) "
                     + "AND p.id = ?", [req.params.id]).then((res) => {
-        console.log("RESULT:", res.json);
         return response.status(200).json(res.json[0]);
       });
     });
@@ -269,7 +268,7 @@ app.post('/images', (req, response) => {
         digest: digest
       });
     } else {
-      console.log(error);
+      console.error("Uploading data to CrateDB failed:", error);
       response.status(500).json({
         error: 'Something went wrong with the upload',
         status: 500,
