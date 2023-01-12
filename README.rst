@@ -114,7 +114,7 @@ Looking for more help?
 .. _JDBC: https://docs.oracle.com/javase/tutorial/jdbc/
 .. _PDO: https://www.php.net/manual/en/book.pdo.php
 .. _pgjdbc: https://github.com/pgjdbc/pgjdbc
-.. _PHP: php
+.. _PHP: php-slim
 .. _Python: python
 .. _REST API: https://crate.io/docs/clients/rest/
 .. _Spark: https://sparkjava.com/
