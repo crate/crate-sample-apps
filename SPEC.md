@@ -1,4 +1,4 @@
-# Backend API Spec for CrateDB Sample App
+# Backend API specification for the CrateDB guestbook demo application
 
 ## Content Type
 
