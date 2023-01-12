@@ -1,0 +1,25 @@
+[project]
+name = "cratedb-python-flask-guestbook-demo"
+version = "0.2.0"
+description = "Backend API implementation of the CrateDB guestbook demo application"
+readme = "README.rst"
+dependencies = [
+  "crash",
+  "crate",
+  "flask<3",
+  "flask-restful<1",
+  "flask-cors<4",
+  "itsdangerous<3",
+  "jinja2<4",
+  "markupsafe<3",
+]
+
+[tool.poe.tasks]
+venv = {cmd="python3 -m venv .venv"}
+install = [
+  {cmd="poe venv"},
+  {cmd=".venv/bin/pip install --editable=."},
+]
+run = [
+  {cmd=".venv/bin/python app.py"},
+]
