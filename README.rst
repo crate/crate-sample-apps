@@ -105,7 +105,7 @@ Looking for more help?
 .. _craterl: https://github.com/crate/craterl
 .. _dbapi: https://www.python.org/dev/peps/pep-0249/
 .. _developer docs: DEVELOP.rst
-.. _Erlang: erlang
+.. _Erlang: erlang-cowboy
 .. _frontend: frontend
 .. _Getting Started: https://crate.io/docs/getting-started/
 .. _HTTPie: https://httpie.io/
