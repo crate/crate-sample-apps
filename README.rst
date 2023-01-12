@@ -115,7 +115,7 @@ Looking for more help?
 .. _PDO: https://www.php.net/manual/en/book.pdo.php
 .. _pgjdbc: https://github.com/pgjdbc/pgjdbc
 .. _PHP: php-slim
-.. _Python: python
+.. _Python: python-flask
 .. _REST API: https://crate.io/docs/clients/rest/
 .. _Spark: https://sparkjava.com/
 .. _Spring Boot: https://spring.io/projects/spring-boot
