@@ -34,6 +34,14 @@ country data::
     crash -c "COPY guestbook.countries FROM '$(pwd)/sql/countries.json' RETURN SUMMARY;"
 
 Please note that the ``countries.json`` file needs to be accessible by CrateDB.
+
+If your instance of CrateDB does not have access to your filesystem, or you are
+not working with the repository, you can use an alternative set of commands to
+access the ``schemas.sql`` and ``countries.json`` files directly from GitHub::
+
+    curl -s https://raw.githubusercontent.com/crate/crate-sample-apps/main/sql/schemas.sql | crash
+    crash -c "COPY guestbook.countries FROM 'https://raw.githubusercontent.com/crate/crate-sample-apps/main/sql/countries.json' RETURN SUMMARY;"
+
 See the `developer docs`_ about how to run and provision CrateDB using Docker.
 
 
