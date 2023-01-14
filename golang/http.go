@@ -172,13 +172,13 @@ func (h Http) GetAllPosts() (int, []*PostDetails, error) {
 	return http.StatusOK, result, nil
 }
 
-func (h Http) GetPostById(id string) (int, []*PostDetails, error) {
+func (h Http) GetPostById(id string) (int, *PostDetails, error) {
 	details, err := h.getPostDetails(id)
 	if err != nil {
-		return http.StatusInternalServerError, nil, fmt.Errorf("can't retrieve post details: %s", err)
+		return http.StatusNotFound, nil, fmt.Errorf(`Post with id="%s" not found`, id)
 	}
 
-	return http.StatusOK, details, nil
+	return http.StatusOK, details[0], nil
 }
 
 func (h Http) CreateNewPost(req *NewPostRequest) (int, []*PostDetails, error) {
@@ -210,7 +210,7 @@ func (h Http) CreateNewPost(req *NewPostRequest) (int, []*PostDetails, error) {
 	return http.StatusCreated, result, nil
 }
 
-func (h Http) UpdatePost(id string, req *UpdatePostRequest) (int, []*PostDetails, error) {
+func (h Http) UpdatePost(id string, req *UpdatePostRequest) (int, *PostDetails, error) {
 
 	_, err := h.processRequest(
 		`UPDATE guestbook.posts SET text=$2 WHERE id=$1`,
@@ -230,7 +230,7 @@ func (h Http) UpdatePost(id string, req *UpdatePostRequest) (int, []*PostDetails
 		return http.StatusInternalServerError, nil, fmt.Errorf("can't retrieve added post: %s", err)
 	}
 
-	return http.StatusOK, details, nil
+	return http.StatusOK, details[0], nil
 }
 
 func (h Http) DeletePost(id string) (int, error) {
@@ -244,7 +244,7 @@ func (h Http) DeletePost(id string) (int, error) {
 	}
 
 	if com.RowCount == 0 {
-		return http.StatusNotFound, fmt.Errorf(`post with id=%s" not found`, id)
+		return http.StatusNotFound, fmt.Errorf(`Post with id="%s" not found`, id)
 
 	}
 
@@ -261,7 +261,7 @@ func (h Http) LikePost(id string) (int, *PostDetails, error) {
 	}
 
 	if com.RowCount == 0 {
-		return http.StatusNotFound, nil, fmt.Errorf(`post with id=%s" not found`, id)
+		return http.StatusNotFound, nil, fmt.Errorf(`Post with id="%s" not found`, id)
 	}
 
 	details, err := h.getPostDetails(id)

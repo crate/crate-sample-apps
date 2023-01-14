@@ -75,13 +75,13 @@ func main() {
 		}{}
 
 		if err := c.ShouldBind(&req); err != nil {
-			c.String(http.StatusBadRequest, "Query_string is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Query_string is required")
 			return
 		}
 
 		status, posts, err := provider.SearchPosts(req.QueryString)
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -93,7 +93,7 @@ func main() {
 
 		status, posts, err := provider.GetAllPosts()
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -105,13 +105,13 @@ func main() {
 
 		id := c.Param("id")
 		if len(id) == 0 {
-			c.String(http.StatusBadRequest, "Post id has incorrect format")
+			writeErrorResponse(c, http.StatusBadRequest, "Post id has incorrect format")
 			return
 		}
 
 		status, post, err := provider.GetPostById(id)
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -123,24 +123,24 @@ func main() {
 		req := NewPostRequest{}
 
 		if err := c.ShouldBind(&req); err != nil {
-			c.String(http.StatusBadRequest, "Can't parse post data")
+			writeErrorResponse(c, http.StatusBadRequest, "Can't parse post data")
 			return
 		}
 
 		if req.User == nil {
-			c.String(http.StatusBadRequest, "user is required")
+			writeErrorResponse(c, http.StatusBadRequest, "user is required")
 			return
 		} else if len(req.User.Name) == 0 {
-			c.String(http.StatusBadRequest, "user should have a name")
+			writeErrorResponse(c, http.StatusBadRequest, "user should have a name")
 			return
 		} else if req.User.Location[0] == 0 || req.User.Location[1] == 0 {
-			c.String(http.StatusBadRequest, "location is required")
+			writeErrorResponse(c, http.StatusBadRequest, "location is required")
 			return
 		}
 
 		status, post, err := provider.CreateNewPost(&req)
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -152,23 +152,23 @@ func main() {
 
 		id := c.Param("id")
 		if len(id) == 0 {
-			c.String(http.StatusBadRequest, "Record id is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Record id is required")
 			return
 		}
 		req := UpdatePostRequest{}
 
 		if err := c.ShouldBind(&req); err != nil {
-			c.String(http.StatusBadRequest, "Can't parse post data")
+			writeErrorResponse(c, http.StatusBadRequest, "Can't parse post data")
 			return
 		}
 
 		if len(req.Text) == 0 {
-			c.String(http.StatusBadRequest, "New post text is required")
+			writeErrorResponse(c, http.StatusBadRequest, "New post text is required")
 			return
 		}
 		status, post, err := provider.UpdatePost(id, &req)
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -180,13 +180,13 @@ func main() {
 
 		id := c.Param("id")
 		if len(id) == 0 {
-			c.String(http.StatusBadRequest, "Record id is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Record id is required")
 			return
 		}
 
 		status, err := provider.DeletePost(id)
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -198,13 +198,13 @@ func main() {
 
 		id := c.Param("id")
 		if len(id) == 0 {
-			c.String(http.StatusBadRequest, "Record id is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Record id is required")
 			return
 		}
 
 		status, post, err := provider.LikePost(id)
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -216,7 +216,7 @@ func main() {
 
 		status, images, err := provider.GetAllImages()
 		if err != nil {
-			c.String(status, err.Error())
+			writeErrorResponse(c, status, err.Error())
 			return
 		}
 
@@ -230,13 +230,18 @@ func main() {
 		}{}
 
 		if err := c.ShouldBind(&req); err != nil {
-			c.String(http.StatusBadRequest, "Blob parameter is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Blob parameter is required")
+			return
+		}
+
+		if len(req.Blob) == 0 {
+			writeErrorResponse(c, http.StatusBadRequest, "Blob parameter is required")
 			return
 		}
 
 		b, err := base64.StdEncoding.DecodeString(req.Blob)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't decode blob: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't decode blob: %s", err))
 			return
 		}
 
@@ -247,21 +252,21 @@ func main() {
 		url := fmt.Sprintf(`%sguestbook_images/%s`, cfg.Blob.BlobURL, digest)
 		request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(b))
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't create an http request: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't create an http request: %s", err))
 			return
 		}
 
 		client := &http.Client{}
 		resp, err := client.Do(request)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't receive a response from crate: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't receive a response from crate: %s", err))
 			return
 		}
 
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusConflict {
-			c.String(http.StatusInternalServerError, "Can't receive a response from crate")
+			writeErrorResponse(c, http.StatusInternalServerError, "Can't receive a response from crate")
 			return
 		}
 
@@ -280,33 +285,34 @@ func main() {
 	server.GET("/image/:digest", func(c *gin.Context) {
 		digest := c.Param("digest")
 		if len(digest) == 0 {
-			c.String(http.StatusBadRequest, "Digest is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Digest is required")
+			return
 		}
 
 		url := fmt.Sprintf(`%sguestbook_images/%s`, cfg.Blob.BlobURL, digest)
 		request, err := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(nil))
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't create an http request: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't create an http request: %s", err))
 			return
 		}
 
 		client := &http.Client{}
 		resp, err := client.Do(request)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't receive a response from crate: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't receive a response from crate: %s", err))
 			return
 		}
 
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			c.String(http.StatusNotFound, "Can't find image with digest: %s", digest)
+			writeErrorResponse(c, http.StatusNotFound, fmt.Sprintf(`Image with digest="%s" not found`, digest))
 			return
 		}
 
 		b, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't read response: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't read response: %s", err))
 			return
 		}
 
@@ -318,31 +324,32 @@ func main() {
 	server.DELETE("/image/:digest", func(c *gin.Context) {
 		digest := c.Param("digest")
 		if len(digest) == 0 {
-			c.String(http.StatusBadRequest, "Digest is required")
+			writeErrorResponse(c, http.StatusBadRequest, "Digest is required")
+			return
 		}
 
 		url := fmt.Sprintf(`%sguestbook_images/%s`, cfg.Blob.BlobURL, digest)
 		request, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(nil))
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't create an http request: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't create an http request: %s", err))
 			return
 		}
 
 		client := &http.Client{}
 		resp, err := client.Do(request)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Can't receive a response from crate: %s", err)
+			writeErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("Can't receive a response from crate: %s", err))
 			return
 		}
 
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusNoContent {
-			c.String(http.StatusNotFound, "Can't delete image with digest: %s", digest)
+			writeErrorResponse(c, http.StatusNotFound, fmt.Sprintf(`Image with digest="%s" not found`, digest))
 			return
 		}
 
-		c.String(http.StatusOK, "")
+		c.String(http.StatusNoContent, "")
 	})
 
 	// running server
@@ -378,6 +385,13 @@ func printError(msg string, err error) {
 	os.Exit(1)
 }
 
+func writeErrorResponse(c *gin.Context, status int, errMessage string) {
+	c.JSON(status, ErrorResponse{
+		Status: status,
+		Error:  errMessage,
+	})
+}
+
 type Config struct {
 	Server struct {
 		Host string `yaml:"host"`
@@ -394,4 +408,9 @@ type Config struct {
 		BlobURL  string `yaml:"blob_url"`
 		BlobMime string `yaml:"blob_mime"`
 	}
+}
+
+type ErrorResponse struct {
+	Status int    `json:"status"`
+	Error  string `json:"error"`
 }

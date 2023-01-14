@@ -93,13 +93,13 @@ func (p PostgreSQL) GetAllPosts() (int, []*PostDetails, error) {
 	return http.StatusOK, result, nil
 }
 
-func (p PostgreSQL) GetPostById(id string) (int, []*PostDetails, error) {
+func (p PostgreSQL) GetPostById(id string) (int, *PostDetails, error) {
 	details, err := p.getPostDetails(id)
 	if err != nil {
-		return http.StatusInternalServerError, nil, fmt.Errorf("can't retrieve post details: %s", err)
+		return http.StatusNotFound, nil, fmt.Errorf(`Post with id="%s" not found`, id)
 	}
 
-	return http.StatusOK, details, nil
+	return http.StatusOK, details[0], nil
 }
 
 func (p PostgreSQL) CreateNewPost(req *NewPostRequest) (int, []*PostDetails, error) {
@@ -131,7 +131,7 @@ func (p PostgreSQL) CreateNewPost(req *NewPostRequest) (int, []*PostDetails, err
 
 }
 
-func (p PostgreSQL) UpdatePost(id string, req *UpdatePostRequest) (int, []*PostDetails, error) {
+func (p PostgreSQL) UpdatePost(id string, req *UpdatePostRequest) (int, *PostDetails, error) {
 	_, err := p.conPool.Exec(context.Background(),
 		`UPDATE guestbook.posts SET text=$2 WHERE id=$1`,
 		id,
@@ -150,7 +150,7 @@ func (p PostgreSQL) UpdatePost(id string, req *UpdatePostRequest) (int, []*PostD
 		return http.StatusInternalServerError, nil, fmt.Errorf("can't retrieve added post: %s", err)
 	}
 
-	return http.StatusOK, details, nil
+	return http.StatusOK, details[0], nil
 }
 
 func (p PostgreSQL) DeletePost(id string) (int, error) {
@@ -163,7 +163,7 @@ func (p PostgreSQL) DeletePost(id string) (int, error) {
 	}
 
 	if com.RowsAffected() == 0 {
-		return http.StatusNotFound, fmt.Errorf(`post with id=%s" not found`, id)
+		return http.StatusNotFound, fmt.Errorf(`Post with id="%s" not found`, id)
 	}
 
 	return http.StatusNoContent, nil
@@ -178,7 +178,7 @@ func (p PostgreSQL) LikePost(id string) (int, *PostDetails, error) {
 	}
 
 	if com.RowsAffected() == 0 {
-		return http.StatusNotFound, nil, fmt.Errorf(`post with id=%s" not found`, id)
+		return http.StatusNotFound, nil, fmt.Errorf(`Post with id="%s" not found`, id)
 	}
 
 	details, err := p.getPostDetails(id)
