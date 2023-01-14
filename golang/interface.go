@@ -6,9 +6,9 @@ type Provider interface {
 	Init(cfg *Config) error
 	SearchPosts(text string) (int, []*PostDetails, error)
 	GetAllPosts() (int, []*PostDetails, error)
-	GetPostById(id string) (int, []*PostDetails, error)
+	GetPostById(id string) (int, *PostDetails, error)
 	CreateNewPost(n *NewPostRequest) (int, []*PostDetails, error)
-	UpdatePost(id string, u *UpdatePostRequest) (int, []*PostDetails, error)
+	UpdatePost(id string, u *UpdatePostRequest) (int, *PostDetails, error)
 	DeletePost(id string) (int, error)
 	LikePost(id string) (int, *PostDetails, error)
 	GetAllImages() (int, []*AllImagesResponse, error)
