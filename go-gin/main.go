@@ -35,7 +35,11 @@ func main() {
 	} else if *fPq {
 		fmt.Println("PostgreSQL wire protocol enabled")
 		provider = new(PostgreSQL)
-	}
+    } else {
+        fmt.Fprintln(os.Stderr, "ERROR: No provider selected")
+        flag.Usage()
+        os.Exit(1)
+    }
 
 	if err := provider.Init(cfg); err != nil {
 		printError("can't initialize provider", err)
