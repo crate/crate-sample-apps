@@ -31,7 +31,7 @@ The minimum required Go version is 1.18.
 Install the application and its dependencies::
 
     git clone https://github.com/crate/crate-sample-apps
-    cd golang
+    cd go-gin
     go mod tidy
 
 
