@@ -46,7 +46,7 @@ public class PostsController {
     }
 
     @PostMapping("/posts")
-    public List<Map<String, Object>> insertPost(@RequestBody Map<String, Object> postProps, HttpServletResponse response) {
+    public List<Map<String, Object>> insertPost(@RequestBody(required=false) Map<String, Object> postProps, HttpServletResponse response) {
         logger.debug("Inserting post in database");
 
         if (postProps == null) {
@@ -72,7 +72,7 @@ public class PostsController {
     }
 
     @PutMapping("/post/{id}")
-    public Map<String, Object> updatePost(@PathVariable String id, @RequestBody Map<String, Object> postProps) {
+    public Map<String, Object> updatePost(@PathVariable String id, @RequestBody(required=false) Map<String, Object> postProps) {
         logger.debug("Updating post with id '" + id + "' in database");
 
         if (postProps == null) {
