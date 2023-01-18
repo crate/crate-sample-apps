@@ -4,5 +4,5 @@ flask<2
 flask-restful
 flask-cors
 itsdangerous<2
-jinja2<3
+jinja2<4
 markupsafe<2
