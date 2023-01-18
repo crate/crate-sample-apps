@@ -2,12 +2,18 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.6.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.13.RELEASE")
     }
 }
 
@@ -15,9 +21,6 @@ version = '0.0.1-SNAPSHOT'
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
-
-sourceCompatibility = '11'
-targetCompatibility = '11'
 
 jar {
     baseName = 'java-spring-crate-jdbc-example'
@@ -34,12 +37,12 @@ repositories {
 
 dependencies {
     implementation 'io.crate:crate-jdbc:2.6.0'
-    implementation 'commons-codec:commons-codec:1.14'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.2.6.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.2.6.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.2.6.RELEASE'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.6.RELEASE'
-    testImplementation 'junit:junit'
+    implementation 'commons-codec:commons-codec:1.15'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.2.13.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.2.13.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.2.13.RELEASE'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.13.RELEASE'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 idea.module.inheritOutputDirs = true
