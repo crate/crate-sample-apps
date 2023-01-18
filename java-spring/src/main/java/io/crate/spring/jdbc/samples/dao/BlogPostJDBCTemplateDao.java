@@ -96,7 +96,7 @@ public class BlogPostJDBCTemplateDao implements BlogPostDao {
                         + "p.\"user\"['name'] as username, p.\"user\"['location'] as userlocation, "
                         + "p.created as created, c.name as country, c.geometry as area, "
                         + "p.image_ref as imageRef, p.like_count as likes " +
-                        "FROM guestbook.posts AS p, \"guestbook.countries\" AS c " +
+                        "FROM guestbook.posts AS p, guestbook.countries AS c " +
                         "WHERE within(p.\"user\"['location'], c.geometry)" +
                         "AND match(text, ?) ORDER BY _score DESC",
                 blogPostRowMapper, query);
