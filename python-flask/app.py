@@ -20,21 +20,19 @@
 # with Crate these terms will supersede the license and you may use the
 # software solely pursuant to the terms of the relevant commercial agreement.
 
-import json
 import uuid
 import base64
 import hashlib
+import typing as t
 
 from datetime import datetime
 from tempfile import TemporaryFile
-
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError, URLError
 
 from crate.client import connect
 
 from flask import (
     Flask,
+    Request,
     g as app_globals,
     make_response,
     jsonify
@@ -365,6 +363,29 @@ class ImageList(ImageResource):
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'error': 'Not found'}), 404
+
+
+def on_json_loading_failed(self, e: t.Optional[ValueError]) -> t.Any:
+    """
+    Respond with custom error message on erroneous JSON requests.
+
+    Otherwise, Flask would catch the error and respond with::
+
+        {
+            "message": "Did not attempt to load JSON data because the "
+                       "request Content-Type was not 'application/json'."
+        }
+
+    There may be empty POST/PUT requests, or requests without Content-Type
+    header, all of them effectively not having a valid JSON payload.
+    """
+
+    # Return an empty data container, containing no parsed arguments.
+    return self.namespace_class()
+
+
+# Monkeypatch the original Flask method.
+Request.on_json_loading_failed = on_json_loading_failed
 
 
 def run():
