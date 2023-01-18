@@ -12,12 +12,12 @@
     <url>https://crate.io/docs/reference/en/latest/protocols/postgres.html</url>
 
     <properties>
-        <spark.version>2.7.2</spark.version>
-        <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
-        <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
-        <gson.version>2.8.9</gson.version>
+        <spark.version>2.9.4</spark.version>
+        <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
+        <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
+        <gson.version>2.10.1</gson.version>
         <crate-jdbc.version>2.6.0</crate-jdbc.version>
-        <slf4j-simple.version>1.7.21</slf4j-simple.version>
+        <slf4j-simple.version>2.0.6</slf4j-simple.version>
     </properties>
 
     <repositories>
@@ -36,7 +36,7 @@
             </snapshots>
             <id>central</id>
             <name>bintray</name>
-            <url>http://dl.bintray.com/crate/crate</url>
+            <url>https://dl.bintray.com/crate/crate</url>
         </repository>
     </repositories>
 
