@@ -72,7 +72,7 @@ public class ImagesController {
     }
 
     @PostMapping("/images")
-    public Map<String, String> insertImage(@RequestBody Map<String, Object> imageProps, HttpServletResponse response) {
+    public Map<String, String> insertImage(@RequestBody(required=false) Map<String, Object> imageProps, HttpServletResponse response) {
         logger.debug("Inserting image into database");
         if (imageProps == null) {
             throw new ArgumentRequiredException("Request body is required");
