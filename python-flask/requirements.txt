@@ -3,6 +3,6 @@ crate
 flask<2
 flask-restful
 flask-cors
-itsdangerous<2
+itsdangerous<3
 jinja2<3
 markupsafe<2
