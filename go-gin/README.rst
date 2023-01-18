@@ -32,7 +32,7 @@ Install the application and its dependencies::
 
     git clone https://github.com/crate/crate-sample-apps
     cd go-gin
-    go mod tidy
+    go build
 
 
 Run
@@ -51,6 +51,14 @@ To use PostgreSQL protocol, please use::
 Then, open the app::
 
     open http://localhost:8080/
+
+
+Update dependencies
+===================
+::
+
+    go get -t -u ./...
+    go mod tidy
 
 
 .. _Gin Web Framework: https://github.com/gin-gonic/gin
