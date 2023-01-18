@@ -5,7 +5,7 @@ apply plugin: 'org.springframework.boot'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -14,7 +14,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.7.7")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:3.0.1")
     }
 }
 
@@ -39,10 +39,10 @@ repositories {
 dependencies {
     implementation 'commons-codec:commons-codec:1.15'
     implementation 'io.crate:crate-jdbc:2.6.0'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.7.7'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.7.7'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.7'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.7'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.0.1'
     testImplementation 'junit:junit:4.13.2'
 }
 
