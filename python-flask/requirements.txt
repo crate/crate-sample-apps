@@ -1,6 +1,6 @@
 crash
 crate
-flask<2
+flask<3
 flask-restful
 flask-cors
 itsdangerous<2
