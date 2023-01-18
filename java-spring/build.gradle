@@ -14,11 +14,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.13")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.7.7")
     }
 }
 
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0-SNAPSHOT'
 
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
@@ -39,10 +39,10 @@ repositories {
 dependencies {
     implementation 'commons-codec:commons-codec:1.15'
     implementation 'io.crate:crate-jdbc:2.6.0'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.4.13'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.4.13'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.4.13'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.4.13'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.7.7'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.7.7'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.7'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.7'
     testImplementation 'junit:junit:4.13.2'
 }
 
