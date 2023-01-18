@@ -39,7 +39,7 @@ dependencies {
     implementation 'io.crate:crate-jdbc:2.6.0'
     implementation 'commons-codec:commons-codec:1.15'
     implementation 'org.springframework.boot:spring-boot-starter-web:2.2.13.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:2.2.13.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.2.13.RELEASE'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.13.RELEASE'
     testImplementation 'junit:junit:4.13.2'
