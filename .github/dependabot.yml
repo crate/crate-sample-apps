@@ -6,32 +6,37 @@
 version: 2
 updates:
 
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
   - directory: "/go-gin" # Location of package manifests
     package-ecosystem: "gomod" # See documentation for possible values  
     schedule:
-      interval: "monthly"
+      interval: "weekly"
 
   - directory: "/java-spark"
     package-ecosystem: "maven"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
 
   - directory: "/java-spring"
     package-ecosystem: "gradle"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
 
   - directory: "/nodejs-express"
     package-ecosystem: "npm"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
 
   - directory: "/php-slim"
     package-ecosystem: "composer"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
 
   - directory: "/python-flask"
     package-ecosystem: "pip"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
