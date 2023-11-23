@@ -1,0 +1,63 @@
+name: Node.js / Express
+
+on:
+  pull_request:
+    branches: ~
+    paths:
+    - '.github/workflows/test-nodejs-express.yml'
+    - 'nodejs-express/**'
+    - 'requirements.txt'
+  push:
+    branches: [ main ]
+    paths:
+    - '.github/workflows/test-nodejs-express.yml'
+    - 'nodejs-express/**'
+    - 'requirements.txt'
+
+  # Allow job to be triggered manually.
+  workflow_dispatch:
+
+  # Run job each night after CrateDB nightly has been published.
+  schedule:
+    - cron: '0 3 * * *'
+
+# Cancel in-progress jobs when pushing to the same branch.
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  test:
+    name: "
+     Node.js: ${{ matrix.nodejs-version }}
+     CrateDB: ${{ matrix.cratedb-version }}
+     on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest' ]
+        nodejs-version: [ '16', '18', '20' ]
+        cratedb-version: [ 'nightly' ]
+
+    steps:
+
+      - name: Acquire sources
+        uses: actions/checkout@v4
+
+      - name: Install utilities
+        run: |
+          pip install -r requirements.txt
+
+      # https://github.com/actions/setup-node
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.nodejs-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            nodejs-express/package.json
+
+      - name: Validate nodejs-express
+        run: |
+          ngr test --accept-no-venv nodejs-express

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon server.js --verbose",
     "debug": "DEBUG=express:* nodemon server.js --verbose",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Warning: No tests specified\" && nodemon --version && node --check server.js && exit 0"
   },
   "author": "",
   "license": "ISC",
