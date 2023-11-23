@@ -1,0 +1,61 @@
+name: PHP / SLIM
+
+on:
+  pull_request:
+    branches: ~
+    paths:
+    - '.github/workflows/test-php-slim.yml'
+    - 'php-slim/**'
+    - 'requirements.txt'
+  push:
+    branches: [ main ]
+    paths:
+    - '.github/workflows/test-php-slim.yml'
+    - 'php-slim/**'
+    - 'requirements.txt'
+
+  # Allow job to be triggered manually.
+  workflow_dispatch:
+
+  # Run job each night after CrateDB nightly has been published.
+  schedule:
+    - cron: '0 3 * * *'
+
+# Cancel in-progress jobs when pushing to the same branch.
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  test:
+    name: "
+     PHP: ${{ matrix.php-version }}
+     CrateDB: ${{ matrix.cratedb-version }}
+     on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest' ]
+        php-version: [ '7.4', '8.2', '8.3' ]
+        cratedb-version: [ 'nightly' ]
+
+    steps:
+
+      - name: Acquire sources
+        uses: actions/checkout@v4
+
+      - name: Install utilities
+        run: |
+          pip install -r requirements.txt
+
+      # https://github.com/marketplace/actions/setup-php-action
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo_pgsql
+
+      - name: Validate php-slim
+        run: |
+          ngr test --accept-no-venv php-slim
