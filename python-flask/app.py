@@ -24,6 +24,7 @@ import uuid
 import base64
 import hashlib
 import typing as t
+import sys
 
 from datetime import datetime
 from tempfile import TemporaryFile
@@ -400,4 +401,9 @@ def run():
 
 
 if __name__ == '__main__':
+    if "--info" in sys.argv[1:]:
+        from importlib.metadata import version
+        app_version = version("cratedb-python-flask-guestbook-demo")
+        print(f"Backend API implementation of the CrateDB guestbook demo application, version {app_version}")
+        sys.exit(0)
     run()
