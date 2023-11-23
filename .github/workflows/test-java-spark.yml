@@ -45,11 +45,6 @@ jobs:
       - name: Acquire sources
         uses: actions/checkout@v4
 
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go-version }}
-
       - name: Install utilities
         run: |
           pip install -r requirements.txt
