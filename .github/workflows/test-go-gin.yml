@@ -1,16 +1,16 @@
-name: Go
+name: Go / Gin
 
 on:
   pull_request:
     branches: ~
     paths:
-    - '.github/workflows/test-go.yml'
+    - '.github/workflows/test-go-gin.yml'
     - 'go-gin/**'
     - 'requirements.txt'
   push:
     branches: [ main ]
     paths:
-    - '.github/workflows/test-go.yml'
+    - '.github/workflows/test-go-gin.yml'
     - 'go-gin/**'
     - 'requirements.txt'
 
