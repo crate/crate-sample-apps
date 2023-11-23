@@ -52,7 +52,8 @@ jobs:
 
       - name: Install utilities
         run: |
-          pip install -r requirements.txt
+          pip install --upgrade 'pip>=23.3' 'setuptools>=64'
+          pip install --requirement requirements.txt
 
       - name: Validate go-gin
         run: |
