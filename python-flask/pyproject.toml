@@ -23,3 +23,8 @@ install = [
 run = [
   {cmd=".venv/bin/python app.py"},
 ]
+check = [
+  {cmd="python -m py_compile app.py"},
+  {cmd="ruff --ignore=E713 app.py"},
+  {cmd="python app.py --info"},
+]
