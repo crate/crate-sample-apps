@@ -1,0 +1,61 @@
+name: Java / Spring
+
+on:
+  pull_request:
+    branches: ~
+    paths:
+    - '.github/workflows/test-java-spring.yml'
+    - 'java-spring/**'
+    - 'requirements.txt'
+  push:
+    branches: [ main ]
+    paths:
+    - '.github/workflows/test-java-spring.yml'
+    - 'java-spring/**'
+    - 'requirements.txt'
+
+  # Allow job to be triggered manually.
+  workflow_dispatch:
+
+  # Run job each night after CrateDB nightly has been published.
+  schedule:
+    - cron: '0 3 * * *'
+
+# Cancel in-progress jobs when pushing to the same branch.
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  test:
+    name: "
+     Java: ${{ matrix.java-version }}
+     CrateDB: ${{ matrix.cratedb-version }}
+     on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest' ]
+        java-version: [ '17' ]
+        cratedb-version: [ 'nightly' ]
+
+    steps:
+
+      - name: Acquire sources
+        uses: actions/checkout@v4
+
+      - name: Install utilities
+        run: |
+          pip install -r requirements.txt
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: ${{ matrix.java-version }}
+          cache: "maven"
+
+      - name: Validate java-spring
+        run: |
+          ngr test --accept-no-venv java-spring
