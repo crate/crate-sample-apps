@@ -17,11 +17,6 @@ version = '0.1.0-SNAPSHOT'
 processResources.destinationDir = compileJava.destinationDir
 compileJava.dependsOn processResources
 
-jar {
-    baseName = 'java-spring-crate-jdbc-example'
-    version =  version
-}
-
 repositories {
     mavenCentral()
     mavenLocal()
