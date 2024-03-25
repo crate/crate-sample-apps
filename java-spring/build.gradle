@@ -30,7 +30,7 @@ dependencies {
     implementation 'io.crate:crate-jdbc:2.7.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.2.2'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.2.2'
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.2.2'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.2.4'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.2'
     testImplementation 'junit:junit:4.13.2'
 }
