@@ -3,7 +3,7 @@ module github.com/sergesheff/crate-sample-apps/golang
 go 1.18
 
 require (
-	github.com/georgysavva/scany/v2 v2.1.2
+	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/gin-gonic/gin v1.9.1
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/mitchellh/mapstructure v1.5.0
