@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/gin-gonic/gin v1.10.0
-	github.com/jackc/pgx/v5 v5.5.5
+	github.com/jackc/pgx/v5 v5.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/segmentio/ksuid v1.0.4
 	gopkg.in/yaml.v2 v2.4.0
