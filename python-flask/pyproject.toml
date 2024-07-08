@@ -25,6 +25,6 @@ run = [
 ]
 check = [
   {cmd="python -m py_compile app.py"},
-  {cmd="ruff --ignore=E713 app.py"},
+  {cmd="ruff check --ignore=E713 app.py"},
   {cmd="python app.py --info"},
 ]
