@@ -17,7 +17,7 @@
         <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
         <gson.version>2.11.0</gson.version>
         <crate-jdbc.version>2.7.0</crate-jdbc.version>
-        <slf4j-simple.version>2.0.13</slf4j-simple.version>
+        <slf4j-simple.version>2.0.16</slf4j-simple.version>
     </properties>
 
     <repositories>
