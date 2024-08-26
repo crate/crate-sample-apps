@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-web:3.3.1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.1'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.3'
     testImplementation 'junit:junit:4.13.2'
 }
 
