@@ -11,7 +11,7 @@ dependencies = [
   "flask-cors<5",
   "itsdangerous<3",
   "jinja2<4",
-  "markupsafe<3",
+  "markupsafe<4",
 ]
 
 [tool.poe.tasks]
