@@ -3,7 +3,7 @@ module github.com/sergesheff/crate-sample-apps/golang
 go 1.24.0
 
 require (
-	github.com/georgysavva/scany/v2 v2.1.3
+	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/mitchellh/mapstructure v1.5.0
