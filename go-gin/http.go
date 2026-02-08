@@ -257,7 +257,7 @@ func (h Http) LikePost(id string) (int, *PostDetails, error) {
 		`UPDATE guestbook.posts SET like_count = like_count + 1 WHERE id=$1`,
 		id)
 	if err != nil {
-		return http.StatusInternalServerError, nil, fmt.Errorf(fmt.Sprintf("Can't increase likes count: %s", err))
+		return http.StatusInternalServerError, nil, fmt.Errorf("Can't increase likes count: %s", err)
 	}
 
 	if com.RowCount == 0 {
