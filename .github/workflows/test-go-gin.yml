@@ -53,11 +53,9 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Install utilities
-        run: |
-          pip install --upgrade 'pip>=23.3' 'setuptools>=64'
-          pip install --requirement requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Validate go-gin
         run: |
-          ngr test --accept-no-venv go-gin
+          uv run --with=pueblo ngr test go-gin
