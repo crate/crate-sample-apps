@@ -6,7 +6,7 @@ readme = "README.rst"
 dependencies = [
   "crash",
   "crate",
-  "flask<3",
+  "flask<4",
   "flask-restful<1",
   "flask-cors<7",
   "itsdangerous<3",
