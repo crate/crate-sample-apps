@@ -37,7 +37,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ 'ubuntu-latest' ]
-        java-version: [ '17' ]
+        java-version: [
+          '17',
+          '21',
+        ]
         cratedb-version: [ 'nightly' ]
 
     steps:
