@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'commons-codec:commons-codec:1.17.1'
+    implementation 'commons-codec:commons-codec:1.21.0'
     implementation 'io.crate:crate-jdbc:2.7.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.5.10'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.5.10'
