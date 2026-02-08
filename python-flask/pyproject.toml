@@ -3,6 +3,7 @@ name = "cratedb-python-flask-guestbook-demo"
 version = "0.2.0"
 description = "Backend API implementation of the CrateDB guestbook demo application"
 readme = "README.rst"
+requires-python = ">=3.8"
 dependencies = [
   "crash",
   "crate",
@@ -13,15 +14,13 @@ dependencies = [
   "jinja2<4",
   "markupsafe<4",
 ]
+optional-dependencies.develop = [
+  "poethepoet<1",
+]
 
 [tool.poe.tasks]
-venv = {cmd="python3 -m venv .venv"}
-install = [
-  {cmd="poe venv"},
-  {cmd=".venv/bin/pip install --editable=."},
-]
 run = [
-  {cmd=".venv/bin/python app.py"},
+  {cmd="python app.py"},
 ]
 check = [
   {cmd="python -m py_compile app.py"},

@@ -37,7 +37,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ 'ubuntu-latest' ]
-        python-version: [ '3.8', '3.12' ]
+        python-version: [
+          '3.12',
+          '3.13',
+          '3.14',
+        ]
         cratedb-version: [ 'nightly' ]
 
     steps:
@@ -54,11 +58,9 @@ jobs:
           cache-dependency-path: |
             python-flask/pyproject.toml
 
-      - name: Install utilities
-        run: |
-          pip install --upgrade 'pip>=23.3' 'setuptools>=64'
-          pip install --requirement requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Validate python-flask
         run: |
-          ngr test --accept-no-venv python-flask
+          uv run --with=poethepoet --with=pueblo ngr test python-flask

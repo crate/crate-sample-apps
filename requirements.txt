@@ -1,5 +1,0 @@
-# For real.
-# pueblo==0.0.3
-
-# Development.
-pueblo @ git+https://github.com/pyveci/pueblo.git@main
