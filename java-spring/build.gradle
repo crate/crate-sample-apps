@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:3.5.10")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:4.0.2")
     }
 }
 
@@ -28,10 +28,10 @@ repositories {
 dependencies {
     implementation 'commons-codec:commons-codec:1.21.0'
     implementation 'io.crate:crate-jdbc:2.7.0'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.5.10'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.5.10'
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.5.10'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.5.10'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:4.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:4.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-web:4.0.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:4.0.2'
     testImplementation 'junit:junit:4.13.2'
 }
 
