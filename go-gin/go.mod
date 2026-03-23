@@ -1,11 +1,11 @@
 module github.com/sergesheff/crate-sample-apps/golang
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/gin-gonic/gin v1.11.0
-	github.com/jackc/pgx/v5 v5.8.0
+	github.com/jackc/pgx/v5 v5.9.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/segmentio/ksuid v1.0.4
 	gopkg.in/yaml.v2 v2.4.0
