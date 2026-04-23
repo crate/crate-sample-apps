@@ -1,2 +1,0 @@
-poethepoet<0.43
-ruff<0.16
