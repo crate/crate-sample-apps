@@ -63,4 +63,4 @@ jobs:
 
       - name: Validate python-flask
         run: |
-          uv run --with=poethepoet --with=pueblo ngr test python-flask
+          uvx --from=pueblo --with="poethepoet<0.43" ngr test python-flask

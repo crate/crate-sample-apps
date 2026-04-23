@@ -15,7 +15,7 @@ dependencies = [
   "markupsafe<4",
 ]
 optional-dependencies.develop = [
-  "poethepoet<1",
+  "poethepoet<0.43",
 ]
 
 [tool.poe.tasks]
