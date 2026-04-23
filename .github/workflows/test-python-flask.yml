@@ -61,4 +61,12 @@ jobs:
 
       - name: Validate python-flask
         run: |
-          uvx --from=pueblo --with="poethepoet<0.43" ngr test python-flask
+
+          # Somehow broken as of 2026-04?
+          # TODO: Please report to `pyveci/pueblo` on GitHub.
+          # uvx --from=pueblo --with="poethepoet<0.43" ngr test python-flask
+
+          # Workaround.
+          cd python-flask
+          uv pip install '.[develop]'
+          poe check

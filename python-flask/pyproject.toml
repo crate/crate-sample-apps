@@ -16,6 +16,7 @@ dependencies = [
 ]
 optional-dependencies.develop = [
   "poethepoet<0.43",
+  "ruff<0.16",
 ]
 
 [tool.poe.tasks]
