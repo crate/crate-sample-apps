@@ -40,6 +40,7 @@ jobs:
         java-version: [
           '17',
           '21',
+          '25',
         ]
         cratedb-version: [ 'nightly' ]
 
