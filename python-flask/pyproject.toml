@@ -15,7 +15,7 @@ dependencies = [
   "markupsafe<4",
 ]
 optional-dependencies.develop = [
-  "poethepoet<0.43",
+  "poethepoet<0.48",
   "ruff<0.16",
 ]
 
